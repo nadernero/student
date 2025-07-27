@@ -3,134 +3,497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نتيجة التصفيات الداخلية</title>
+    <title>نتائج التصفيات الكنيسة</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
+        * {
             margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', 'Tahoma', sans-serif;
         }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            direction: rtl;
+        }
+
         .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 2.5rem;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 550px;
             text-align: center;
-            box-sizing: border-box;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 25px;
-            font-size: 2.2em;
-            font-weight: 600;
+
+        .header {
+            margin-bottom: 2rem;
         }
-        .input-group {
-            margin-bottom: 25px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
+
+        .header h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
         }
-        label {
-            font-size: 1.1em;
-            color: #555;
-            margin-bottom: 5px;
-            text-align: right;
+
+        .header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .search-box {
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
             width: 100%;
-        }
-        input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 1.1em;
+            padding: 1.2rem;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            font-size: 1.2rem;
             text-align: center;
-            transition: border-color 0.3s ease;
-            box-sizing: border-box;
+            transition: all 0.3s ease;
+            direction: ltr;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        input[type="text"]:focus {
-            border-color: #007bff;
+
+        .search-input:focus {
             outline: none;
-            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            width: 100%;
-            max-width: 200px;
-            font-weight: 600;
-        }
-        button:hover {
-            background-color: #0056b3;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
             transform: translateY(-2px);
         }
-        .result-box {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #e9ecef;
-            border-radius: 10px;
-            border: 1px solid #dee2e6;
-            font-size: 1.1em;
-            line-height: 1.6;
-            text-align: right;
-        }
-        .result-box p {
-            margin: 10px 0;
-            font-weight: 500;
-        }
-        .result-box strong {
-            color: #28a745;
-            font-weight: 700;
-        }
-        .result-box .fail {
-            color: #dc3545;
-        }
-        .error-message {
-            color: #dc3545;
-            margin-top: 15px;
+
+        .search-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
             font-weight: bold;
-            display: none; /* Hidden by default */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
         }
-        .footer {
-            margin-top: 40px;
-            font-size: 0.9em;
-            color: #777;
+
+        .search-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
+            border: 2px solid #e6f2ff;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .student-name {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #b71c1c;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid #f0f0f0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .grades-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .grade-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+            transition: all 0.4s ease;
+            border: 3px solid transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        .grade-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .grade-item.study-grade {
+            border-color: #2196F3;
+            background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+            position: relative;
+        }
+
+        .grade-item.study-grade::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2196F3, #21CBF3);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .grade-item.memory-grade {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #e8f5e8 0%, #ffffff 100%);
+            position: relative;
+        }
+
+        .grade-item.memory-grade::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .grade-item.coptic-grade {
+            border-color: #FF9800;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%);
+            position: relative;
+        }
+
+        .grade-item.coptic-grade::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FF9800, #FFC107);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .grade-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .grade-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .grade-item.study-grade .grade-value {
+            color: #1976D2;
+        }
+
+        .grade-item.memory-grade .grade-value {
+            color: #388E3C;
+        }
+
+        .grade-item.coptic-grade .grade-value {
+            color: #F57C00;
+        }
+
+        .grade-na {
+            color: #999;
+            font-style: italic;
+        }
+
+        .status-card {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.4rem;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+            transform: scale(0.8);
+            opacity: 0;
+            animation: statusAppear 0.8s ease-out forwards;
+        }
+
+        @keyframes statusAppear {
+            0% {
+                transform: scale(0.8) translateY(20px);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05) translateY(-5px);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: inherit;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .status-qualified {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-color: #4facfe;
+            animation: statusAppear 0.8s ease-out forwards, pulse-blue 2s infinite 1s;
+        }
+
+        .status-passed { /* هذه الحالة ستستخدم للطلاب غير المؤهلين لكنهم "ناجحين" على مستوى الكنيسة فقط، أو لمن ليس لديهم درجة دراسة*/
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            border-color: #43e97b;
+            animation: statusAppear 0.8s ease-out forwards, pulse-green 2s infinite 1s;
+        }
+
+        .status-church-only { /* اسم أوضح للحالة التي تشير إلى عدم التأهل للتصفيات الخارجية */
+            background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%);
+            color: white;
+            border-color: #ffa726;
+            animation: statusAppear 0.8s ease-out forwards, pulse-orange 2s infinite 1s;
+        }
+
+        .status-text-animate {
+            display: inline-block;
+            animation: textBounce 0.6s ease-out 0.3s both;
+        }
+
+        @keyframes textBounce {
+            0% {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(-5px);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .status-icon {
+            display: inline-block;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            animation: iconRotate 1s ease-out 0.5s both;
+        }
+
+        @keyframes iconRotate {
+            0% {
+                transform: rotate(-180deg) scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: rotate(-90deg) scale(1.2);
+                opacity: 0.7;
+            }
+            100% {
+                transform: rotate(0deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse-blue {
+            0%, 100% { 
+                box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 12px 35px rgba(79, 172, 254, 0.5);
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { 
+                box-shadow: 0 8px 25px rgba(67, 233, 123, 0.3);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 12px 35px rgba(67, 233, 123, 0.5);
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes pulse-orange {
+            0%, 100% { 
+                box-shadow: 0 8px 25px rgba(255, 167, 38, 0.3);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 12px 35px rgba(255, 167, 38, 0.5);
+                transform: scale(1.02);
+            }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sample-codes {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            text-align: right;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            display: none; /* مخفية افتراضياً */
+        }
+
+        .sample-codes h3 {
+            color: #495057;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .grades-container {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .student-name {
+                font-size: 1.3rem;
+            }
         }
     </style>
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>نتيجة التصفيات الداخلية</h1>
-        <div class="input-group">
-            <label for="studentCode">أدخل كود الطالب:</label>
-            <input type="text" id="studentCode" placeholder="مثال: 123456" onkeypress="handleKeyPress(event)">
-            <button onclick="searchStudent()">بحث</button>
+        <div class="header">
+            <h1>نتائج التصفيات الداخلية بالكنيسة</h1>
+            <p>أدخل الكود الخاص بك للاستعلام عن النتيجة</p>
         </div>
-        <div id="result" class="result-box">
-            <p id="nameDisplay"></p>
-            <p id="gradesDisplay"></p>
-            <p id="qualificationDisplay"></p>
+
+        <div class="search-box">
+            <input type="text" class="search-input" id="studentCode" placeholder="أدخل كود الطالب">
+            <button class="search-btn" onclick="searchStudent()">البحث عن النتيجة</button>
         </div>
-        <p id="errorMessage" class="error-message">يرجى إدخال كود صالح أو لم يتم العثور على الطالب.</p>
-    </div>
-    <div class="footer">
-        <p>&copy; 2024 جميع الحقوق محفوظة.</p>
+
+        <div class="sample-codes" id="sampleCodes">
+            <h3>أكواد تجريبية للاختبار</h3>
+            <div id="codesList"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 1rem;">جاري البحث...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            <strong>لم يتم العثور على الطالب!</strong><br>
+            تأكد من صحة الكود المدخل وحاول مرة أخرى.
+        </div>
+
+        <div class="result-card" id="resultCard">
+            <div class="student-name" id="studentName"></div>
+            
+            <div class="grades-container">
+                <div class="grade-item study-grade">
+                    <div class="grade-label">الدراسي</div>
+                    <div class="grade-value" id="studyGrade">--</div>
+                </div>
+                <div class="grade-item memory-grade">
+                    <div class="grade-label">المحفوظات</div>
+                    <div class="grade-value" id="memoryGrade">--</div>
+                </div>
+                <div class="grade-item coptic-grade">
+                    <div class="grade-label">القبطي</div>
+                    <div class="grade-value" id="copticGrade">--</div>
+                </div>
+            </div>
+
+            <div class="status-card" id="statusCard">
+                <div id="statusText"></div>
+            </div>
+        </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         let studentsData = [];
 
@@ -174,7 +537,8 @@
                     
                     if (codeCell && nameCell) { // يجب أن يكون الكود والاسم موجودين
                         const studyGrade = studyCell?.v || 0;
-                        const qualifiesForExternalExams = studyGrade >= 45; // شرط اجتياز امتحان الدراسة
+                        // يمكن تعديل شرط التأهيل هنا إذا تغيرت القواعد
+                        const qualifiesForExternalExams = studyGrade >= 45; 
 
                         loadedData.push({
                             code: String(codeCell.v).trim(),
@@ -192,96 +556,153 @@
             } catch (error) {
                 console.error('خطأ في تحميل البيانات من ملف Excel أو معالجتها. استخدام البيانات البديلة:', error);
                 
-                // ***** 5 أكواد بيانات بديلة (احتياطية) جديدة *****
+                // ***** البيانات البديلة (احتياطية) *****
                 studentsData = [
-                    {code: "100001", name: "أحمد محمد محمود", study: 48, memory: 45, coptic: 30, qualifiesForExternalExams: true},
-                    {code: "100002", name: "فاطمة علي سعيد", study: 40, memory: null, coptic: 25, qualifiesForExternalExams: false},
-                    {code: "100003", name: "يوسف خالد حسن", study: 50, memory: 50, coptic: 40, qualifiesForExternalExams: true},
-                    {code: "100004", name: "مريم إبراهيم أحمد", study: 42, memory: 38, coptic: null, qualifiesForExternalExams: false},
-                    {code: "100005", name: "عمران السيد محمود", study: 45, memory: 48, coptic: 35, qualifiesForExternalExams: true},
-                    // البيانات البديلة الأصلية (من الكود السابق) يمكن إبقاؤها أو حذفها حسب الرغبة
+                    // 5 أكواد بديلة جديدة
+                    
+                    // البيانات البديلة الأصلية (من الكود السابق الذي أرفقته)
                     {code: "877890", name: "استيفن اسامه منير ناشد", study: 42, memory: null, coptic: null, qualifiesForExternalExams: false},
-                    {code: "596041", name: "استيفن البير رفعت لمعي", study: 50, memory: null, coptic: 28, qualifiesForExternalExams: true},
-                    {code: "488155", name: "استيفن عماد فوزي غبريال", study: 48, memory: 50, coptic: 26, qualifiesForExternalExams: true},
-                    {code: "933750", name: "استيفن ميخائيل مكرم اليشع", study: 50, memory: 48, coptic: 26, qualifiesForExternalExams: true},
-                    {code: "263076", name: "اندرو بيتر ناشد", study: 38, memory: null, coptic: null, qualifiesForExternalExams: false},
-                    {code: "815021", name: "اندرو مايكل محفوظ ابراهيم", study: 42, memory: 40, coptic: 34, qualifiesForExternalExams: false},
-                    {code: "749958", name: "اوليفيا مينا جوزيف ويصا", study: 40, memory: 50, coptic: 42, qualifiesForExternalExams: false},
-                    {code: "463708", name: "ايريني عماد مكرم قاصد", study: 42, memory: 50, coptic: 44, qualifiesForExternalExams: false},
-                    {code: "183562", name: "ايريني فضل مرشد", study: 48, memory: 50, coptic: 40, qualifiesForExternalExams: true},
-                    {code: "686400", name: "ايلاريا نصير اسحاق ويصا", study: 48, memory: 50, coptic: 38, qualifiesForExternalExams: true},
-                    {code: "827349", name: "باتريك مجدي عوض جورج", study: 46, memory: 50, coptic: 36, qualifiesForExternalExams: true},
-                    {code: "395172", name: "باسيل شنودة فكري جورج", study: 48, memory: 50, coptic: 32, qualifiesForExternalExams: true},
-                    {code: "651428", name: "بافلي بيشوي جورج نصيف", study: 42, memory: null, coptic: null, qualifiesForExternalExams: false},
-                    {code: "704893", name: "بيتر عادل فهيم يوسف", study: 48, memory: 50, coptic: 38, qualifiesForExternalExams: true},
-                    {code: "216754", name: "بيشوي عاطف حبيب جرجس", study: 46, memory: 50, coptic: 34, qualifiesForExternalExams: true},
-                    {code: "582917", name: "تيموثاوس اشرف سعد ميخائيل", study: 42, memory: 40, coptic: 28, qualifiesForExternalExams: false},
-                    {code: "439685", name: "جاد مجدي رياض شنودة", study: 38, memory: null, coptic: null, qualifiesForExternalExams: false},
-                    {code: "793251", name: "جورج عماد حبيب يوسف", study: 44, memory: 45, coptic: 32, qualifiesForExternalExams: false},
-                    {code: "157604", name: "حبيب صبحي حبيب يوسف", study: 46, memory: 50, coptic: 36, qualifiesForExternalExams: true},
-                    {code: "685392", name: "دانيال اشرف فكري عبد النور", study: 48, memory: 50, coptic: 40, qualifiesForExternalExams: true},
-                    {code: "741826", name: "ديفيد مينا عبد الملاك ناجي", study: 44, memory: 48, coptic: 34, qualifiesForExternalExams: false},
-                    {code: "398457", name: "رامي اشرف رياض شنودة", study: 40, memory: 45, coptic: 30, qualifiesForExternalExams: false},
-                    {code: "629814", name: "روماني نبيل مكرم قاصد", study: 46, memory: 50, coptic: 38, qualifiesForExternalExams: true},
-                    {code: "512379", name: "ساندرو عماد عوض جورج", study: 42, memory: 50, coptic: 32, qualifiesForExternalExams: false},
-                    {code: "2203", name: "نادر نسيم عبد المسيح", study: 42, memory: 50, coptic: 32, qualifiesForExternalExams: false},
-                    {code: "22003", name: "نادر 2 نسيم عبد المسيح", study: 48, memory: 50, coptic: 32, qualifiesForExternalExams: false},
                     {code: "876543", name: "سانت كلير جورج فايز اسكندر", study: 48, memory: 50, coptic: 42, qualifiesForExternalExams: true}
                 ];
                 console.log(`تم تحميل ${studentsData.length} طالب (البيانات البديلة).`);
             }
         }
 
+        // البحث عن الطالب
         function searchStudent() {
-            const studentCode = document.getElementById('studentCode').value.trim();
-            const nameDisplay = document.getElementById('nameDisplay');
-            const gradesDisplay = document.getElementById('gradesDisplay');
-            const qualificationDisplay = document.getElementById('qualificationDisplay');
+            const code = document.getElementById('studentCode').value.trim();
+            const loading = document.getElementById('loading');
             const errorMessage = document.getElementById('errorMessage');
-
-            // إخفاء أي رسائل خطأ سابقة
+            const resultCard = document.getElementById('resultCard');
+            const sampleCodes = document.getElementById('sampleCodes'); // الإبقاء عليها إذا أردت إظهارها لاحقاً
+            
+            // إخفاء النتائج السابقة
             errorMessage.style.display = 'none';
-            nameDisplay.innerHTML = '';
-            gradesDisplay.innerHTML = '';
-            qualificationDisplay.innerHTML = '';
-
-            if (!studentCode) {
-                errorMessage.textContent = "الرجاء إدخال كود الطالب.";
-                errorMessage.style.display = 'block';
+            resultCard.style.display = 'none';
+            sampleCodes.style.display = 'none'; // تأكد من إخفائها عند البحث
+            
+            if (!code) {
+                showError('يرجى إدخال كود الطالب');
                 return;
             }
-
-            const student = studentsData.find(s => s.code === studentCode);
-
-            if (student) {
-                nameDisplay.innerHTML = `<strong>اسم الطالب:</strong> ${student.name}`;
+            
+            console.log(`البحث عن الكود: "${code}"`);
+            console.log(`عدد الطلاب المتاح: ${studentsData.length}`);
+            
+            // إظهار التحميل
+            loading.style.display = 'block';
+            
+            // محاكاة وقت التحميل (لإظهار Spinner)
+            setTimeout(() => {
+                loading.style.display = 'none';
                 
-                let gradesHtml = `<strong>درجات الطالب:</strong><br>`;
-                gradesHtml += `دراسة: ${student.study !== null ? student.study : 'غير متاح'}<br>`;
-                gradesHtml += `حفظ: ${student.memory !== null ? student.memory : 'غير متاح'}<br>`;
-                gradesHtml += `قبطي: ${student.coptic !== null ? student.coptic : 'غير متاح'}`;
-                gradesDisplay.innerHTML = gradesHtml;
-
-                if (student.qualifiesForExternalExams) {
-                    qualificationDisplay.innerHTML = `<strong style="color: #28a745;">أهلاً: الطالب مؤهل للامتحان الخارجي!</strong>`;
+                // البحث عن الطالب - مقارنة دقيقة للأكواد
+                const student = studentsData.find(s => {
+                    const studentCode = String(s.code).trim();
+                    const searchCode = String(code).trim();
+                    return studentCode === searchCode;
+                });
+                
+                if (student) {
+                    console.log('تم العثور على الطالب:', student.name);
+                    displayResult(student);
                 } else {
-                    qualificationDisplay.innerHTML = `<strong class="fail">للاسف: الطالب غير مؤهل للامتحان الخارجي (درجة الدراسة أقل من 45).</strong>`;
+                    console.log('لم يتم العثور على الطالب');
+                    errorMessage.style.display = 'block';
                 }
-            } else {
-                errorMessage.textContent = "لم يتم العثور على طالب بهذا الكود. يرجى التحقق من الكود المدخل.";
-                errorMessage.style.display = 'block';
-            }
+            }, 500); // 500 مللي ثانية للتأثير البصري
         }
 
-        function handleKeyPress(event) {
-            // تنفيذ البحث عند الضغط على Enter
-            if (event.key === 'Enter') {
+        // عرض نتيجة الطالب
+        function displayResult(student) {
+            const resultCard = document.getElementById('resultCard');
+            const studentName = document.getElementById('studentName');
+            const studyGrade = document.getElementById('studyGrade');
+            const memoryGrade = document.getElementById('memoryGrade');
+            const copticGrade = document.getElementById('copticGrade');
+            const statusCard = document.getElementById('statusCard');
+            const statusText = document.getElementById('statusText');
+            
+            // عرض اسم الطالب
+            studentName.textContent = student.name;
+            
+            // عرض الدرجات
+            studyGrade.textContent = student.study !== null ? student.study : '--';
+            studyGrade.className = student.study !== null ? 'grade-value' : 'grade-value grade-na';
+            
+            memoryGrade.textContent = student.memory !== null ? student.memory : '--';
+            memoryGrade.className = student.memory !== null ? 'grade-value' : 'grade-value grade-na';
+            
+            copticGrade.textContent = student.coptic !== null ? student.coptic : '--';
+            copticGrade.className = student.coptic !== null ? 'grade-value' : 'grade-value grade-na';
+            
+            // تحديد حالة التأهل
+            if (student.qualifiesForExternalExams) {
+                statusCard.className = 'status-card status-qualified';
+                statusText.innerHTML = '<span class="status-icon">🎉</span> <span class="status-text-animate">ناجح ومؤهل للتصفيات الخارجية!</span>';
+            } else if (student.study !== null && student.study < 45) {
+                // حالة الطالب غير المؤهل للامتحان الخارجي بسبب درجة الدراسة
+                statusCard.className = 'status-card status-church-only';
+                statusText.innerHTML = '<span class="status-icon">⚠️</span> <span class="status-text-animate">ناجح على مستوى الكنيسة فقط (درجة الدراسة أقل من 45).</span>';
+            } else {
+                // حالة إذا كانت درجة الدراسة غير متاحة أو أي حالة أخرى تستدعي المراجعة
+                statusCard.className = 'status-card status-passed'; // يمكن تعديل هذا الكلاس أو إضافة كلاس جديد للمراجعة
+                statusText.innerHTML = '<span class="status-icon">❓</span> <span class="status-text-animate">لا توجد درجة للمادة الدراسية<br><small>يرجى مراجعة الإدارة</small></span>';
+            }
+            
+            // إظهار كارت النتيجة وتفعيل التأثيرات
+            resultCard.style.display = 'block';
+            statusCard.style.transform = 'scale(0.8)'; // إعادة تهيئة للحركة
+            statusCard.style.opacity = '0';
+            // إعادة تطبيق الأنماط لتشغيل الرسوم المتحركة
+            void statusCard.offsetWidth; // Force reflow
+            resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); // التمرير للنتيجة
+        }
+
+        // إظهار رسالة خطأ
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.innerHTML = `<strong>خطأ!</strong><br>${message}`;
+            errorMessage.style.display = 'block';
+        }
+
+        // التعامل مع الضغط على Enter
+        document.getElementById('studentCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
                 searchStudent();
             }
-        }
+        });
+
+        // إخفاء الأكواد التجريبية عند البدء في الكتابة (يمكن تفعيلها لعرض الأكواد)
+        document.getElementById('studentCode').addEventListener('input', function() {
+            // const sampleCodes = document.getElementById('sampleCodes');
+            // sampleCodes.style.display = 'none'; // لإخفاء قائمة الأكواد التجريبية عند البدء في الكتابة
+        });
 
         // تحميل البيانات عند تحميل الصفحة
-        window.onload = loadStudentsData;
+        window.addEventListener('load', function() {
+            console.log('تحميل الصفحة...');
+            loadStudentsData().then(() => {
+                console.log('تم تحميل البيانات بنجاح.');
+                // يمكن هنا تفعيل showSampleCodes() إذا أردت عرضها افتراضياً بعد التحميل
+            }).catch(error => {
+                console.error('خطأ في تحميل البيانات الأولية:', error);
+            });
+        });
+
+        // وظيفة لإظهار الأكواد التجريبية (إذا أردت تفعيلها)
+        function showSampleCodes() {
+            const codesListDiv = document.getElementById('codesList');
+            codesListDiv.innerHTML = ''; // مسح أي أكواد موجودة
+            // عرض أول 10 أكواد تجريبية كأمثلة
+            const codesToShow = studentsData.slice(0, 10).map(s => `<li>${s.code} (${s.name})</li>`).join('');
+            codesListDiv.innerHTML = `<ul>${codesToShow}</ul>`;
+            document.getElementById('sampleCodes').style.display = 'block';
+        }
+
+        // يمكن إضافة زر أو استدعاء showSampleCodes() لغرض الاختبار أثناء التطوير
+        // مثال: إذا أردت زر لإظهار الأكواد التجريبية:
+        // <button onclick="showSampleCodes()">عرض أكواد تجريبية</button>
     </script>
 </body>
 </html>
