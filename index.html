@@ -545,6 +545,40 @@
             } catch (error) {
                 console.error('خطأ في تحميل البيانات من ملف Excel أو معالجتها. استخدام البيانات البديلة:', error);
                 
+                // **** هنا كان الخطأ، تم إضافة "studentsData = [" ****
+                studentsData = [
+                    {code: "100001", name: "أحمد محمد محمود", study: 48, memory: 45, coptic: 30},
+                    {code: "100002", name: "فاطمة علي سعيد", study: 40, memory: null, coptic: 25},
+                    {code: "100003", name: "يوسف خالد حسن", study: 50, memory: 50, coptic: 40},
+                    {code: "100004", name: "مريم إبراهيم أحمد", study: 42, memory: 38, coptic: null},
+                    {code: "100005", name: "عمران السيد محمود", study: 45, memory: 48, coptic: 35},
+                    
+                    {code: "877890", name: "استيفن اسامه منير ناشد", study: 42, memory: null, coptic: null},
+                    {code: "596041", name: "استيفن البير رفعت لمعي", study: 50, memory: null, coptic: 28},
+                    {code: "488155", name: "استيفن عماد فوزي غبريال", study: 48, memory: 50, coptic: 26},
+                    {code: "933750", name: "استيفن ميخائيل مكرم اليشع", study: 50, memory: 48, coptic: 26},
+                    {code: "263076", name: "اندرو بيتر ناشد", study: 38, memory: null, coptic: null},
+                    {code: "815021", name: "اندرو مايكل محفوظ ابراهيم", study: 42, memory: 40, coptic: 34},
+                    {code: "749958", name: "اوليفيا مينا جوزيف ويصا", study: 40, memory: 50, coptic: 42},
+                    {code: "463708", name: "ايريني عماد مكرم قاصد", study: 42, memory: 50, coptic: 44},
+                    {code: "183562", name: "ايريني فضل مرشد", study: 48, memory: 50, coptic: 40},
+                    {code: "686400", name: "ايلاريا نصير اسحاق ويصا", study: 48, memory: 50, coptic: 38},
+                    {code: "827349", name: "باتريك مجدي عوض جورج", study: 46, memory: 50, coptic: 36},
+                    {code: "395172", name: "باسيل شنودة فكري جورج", study: 48, memory: 50, coptic: 32},
+                    {code: "651428", name: "بافلي بيشوي جورج نصيف", study: 42, memory: null, coptic: null},
+                    {code: "704893", name: "بيتر عادل فهيم يوسف", study: 48, memory: 50, coptic: 38},
+                    {code: "216754", name: "بيشوي عاطف حبيب جرجس", study: 46, memory: 50, coptic: 34},
+                    {code: "582917", name: "تيموثاوس اشرف سعد ميخائيل", study: 42, memory: 40, coptic: 28},
+                    {code: "439685", name: "جاد مجدي رياض شنودة", study: 38, memory: null, coptic: null},
+                    {code: "793251", name: "جورج عماد حبيب يوسف", study: 44, memory: 45, coptic: 32},
+                    {code: "157604", name: "حبيب صبحي حبيب يوسف", study: 46, memory: 50, coptic: 36},
+                    {code: "685392", name: "دانيال اشرف فكري عبد النور", study: 48, memory: 50, coptic: 40},
+                    {code: "741826", name: "ديفيد مينا عبد الملاك ناجي", study: 44, memory: 48, coptic: 34},
+                    {code: "398457", name: "رامي اشرف رياض شنودة", study: 40, memory: 45, coptic: 30},
+                    {code: "629814", name: "روماني نبيل مكرم قاصد", study: 46, memory: 50, coptic: 38},
+                    {code: "512379", name: "ساندرو عماد عوض جورج", study: 42, memory: 50, coptic: 32},
+                    {code: "2203", name: "نادر نسيم عبد المسيح", study: 42, memory: 50, coptic: 32},
+                    {code: "22003", name: "نادر 2 نسيم عبد المسيح", study: 48, memory: 50, coptic: 32},
                     {code: "876543", name: "سانت كلير جورج فايز اسكندر", study: 48, memory: 50, coptic: 42}
                 ];
                 console.log(`تم تحميل ${studentsData.length} طالب (البيانات البديلة).`);
@@ -685,8 +719,8 @@
             }
 
             if (notAvailableSubjects.length > 0) {
-                 // هذه الحالة لن تظهر فعليًا الآن لأننا لن نذكر المواد غير المتاحة، ولكن يمكن استخدامها للتصحيح
-                 // أو في رسالة عامة إذا لم يكن هناك أي درجات متاحة للطالب
+                // هذه الحالة لن تظهر فعليًا الآن لأننا لن نذكر المواد غير المتاحة، ولكن يمكن استخدامها للتصحيح
+                // أو في رسالة عامة إذا لم يكن هناك أي درجات متاحة للطالب
                 // finalStatusHtml += `<span class="status-icon">❓</span> <span class="status-text-animate">درجات غير متاحة لـ: ${notAvailableSubjects.join(', ')}.</span><br>`;
             }
 
