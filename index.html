@@ -487,6 +487,69 @@
         </div>
     </div>
 
+        <script>
+        let studentsData = [];
+
+        async function loadStudentsData() {
+            try {
+                console.log('بدء تحميل البيانات من ملف Excel...');
+                // المسار النسبي لملف الإكسل في نفس مجلد ملف HTML
+                const excelUrl = './نتيجة التصفيات الداخلية.xlsx'; 
+                const response = await fetch(excelUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`فشل في تحميل ملف Excel: ${response.status} ${response.statusText}`);
+                }
+
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { 
+                    type: 'array',
+                    cellStyles: true,
+                    cellFormulas: true,
+                    cellDates: true,
+                    cellNF: true,
+                    sheetStubs: true
+                });
+                
+                // تأكد من اسم ورقة العمل هنا، يجب أن يطابق تماماً الموجود في ملف الإكسل
+                const worksheet = workbook.Sheets['نتيجة التصفيات']; 
+                if (!worksheet) {
+                    throw new Error('لم يتم العثور على ورقة العمل "نتيجة التصفيات" في ملف Excel. يرجى التأكد من اسمها.');
+                }
+                
+                const range = XLSX.utils.decode_range(worksheet['!ref']);
+                let loadedData = [];
+                
+                // بدء من الصف الثاني (index 1) لتجاوز رؤوس الأعمدة
+                for (let rowNum = 1; rowNum <= range.e.r; rowNum++) {
+                    const codeCell = worksheet[XLSX.utils.encode_cell({r: rowNum, c: 0})]; // العمود A
+                    const nameCell = worksheet[XLSX.utils.encode_cell({r: rowNum, c: 1})]; // العمود B
+                    const studyCell = worksheet[XLSX.utils.encode_cell({r: rowNum, c: 2})]; // العمود C
+                    const memoryCell = worksheet[XLSX.utils.encode_cell({r: rowNum, c: 3})]; // العمود D
+                    const copticCell = worksheet[XLSX.utils.encode_cell({r: rowNum, c: 4})]; // العمود E
+                    
+                    if (codeCell && nameCell) { // يجب أن يكون الكود والاسم موجودين
+                        const studyGrade = studyCell?.v || 0;
+                        const qualifiesForExternalExams = studyGrade >= 45; // شرط اجتياز امتحان الدراسة
+
+                        loadedData.push({
+                            code: String(codeCell.v).trim(),
+                            name: String(nameCell.v).trim(),
+                            study: studyCell?.v || null,
+                            memory: memoryCell?.v || null,
+                            coptic: copticCell?.v || null,
+                            qualifiesForExternalExams: qualifiesForExternalExams
+                        });
+                    }
+                }
+                studentsData = loadedData;
+                console.log(`تم تحميل ${studentsData.length} طالب بنجاح من ملف Excel.`);
+                
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات من ملف Excel أو معالجتها. استخدام البيانات البديلة:', error);
+                
+                // ***** 5 أكواد بيانات بديلة (احتياطية) جديدة *****
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         let studentsData = [];
