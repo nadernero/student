@@ -500,6 +500,98 @@
 
         // تحميل بيانات الطلاب من ملف الإكسل
         async function loadStudentsData() {
+    try {
+        console.log('بدء تحميل البيانات...');
+
+        // **** هذا هو التعديل المطلوب: استخدم fetch لطلب ملف Excel من الويب ****
+        // تأكد من أن المسار هنا صحيح:
+        // https://<اسم-مستخدم-GitHub-الخاص-بك>.github.io/<اسم-المستودع>/نتيجة التصفيات الداخلية.xlsx
+        const excelUrl = './نتيجة التصفيات الداخلية.xlsx'; // './' تعني في نفس المجلد
+        const response = await fetch(excelUrl);
+
+        if (!response.ok) {
+            throw new Error(`فشل في تحميل ملف Excel: ${response.status} ${response.statusText}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { 
+            type: 'array', // تأكد من هذا النوع
+            cellStyles: true,
+            cellFormulas: true,
+            cellDates: true,
+            cellNF: true,
+            sheetStubs: true
+        });
+
+        const worksheet = workbook.Sheets['نتيجة التصفيات'];
+        if (!worksheet) {
+            throw new Error('لم يتم العثور على ورقة العمل "نتيجة التصفيات"');
+        }
+
+        const range = XLSX.utils.decode_range(worksheet['!ref']);
+        studentsData = [];
+
+        for (let rowNum = 1; rowNum <= range.e.r; rowNum++) {
+            const codeCell = worksheet[XLSX.utils.encode_cell({r: rowNum, c: 0})];
+            const nameCell = worksheet[XLSX.utils.encode_cell({r: rowNum, c: 1})];
+            const studyCell = worksheet[XLSX.utils.encode_cell({r: rowNum, c: 2})];
+            const memoryCell = worksheet[XLSX.utils.encode_cell({r: rowNum, c: 3})];
+            const copticCell = worksheet[XLSX.utils.encode_cell({r: rowNum, c: 4})];
+
+            if (codeCell && nameCell) {
+                const studyGrade = studyCell?.v || 0;
+                const qualifiesForExternalExams = studyGrade >= 45;
+
+                studentsData.push({
+                    code: String(codeCell.v).trim(),
+                    name: String(nameCell.v).trim(),
+                    study: studyCell?.v || null,
+                    memory: memoryCell?.v || null,
+                    coptic: copticCell?.v || null,
+                    qualifiesForExternalExams: qualifiesForExternalExams
+                });
+            }
+        }
+
+        console.log(`تم تحميل ${studentsData.length} طالب بنجاح من ملف Excel`);
+
+    } catch (error) {
+        console.error('خطأ في تحميل البيانات من الويب أو في معالجة الإكسل، استخدام البيانات البديلة:', error);
+        // البيانات البديلة (Mock Data) الخاصة بك هنا
+        studentsData = [
+            // ... (البيانات البديلة التي أرفقتها أنت سابقاً)
+             {code: "877890", name: "استيفن اسامه منير ناشد", study: 42, memory: null, coptic: null, qualifiesForExternalExams: false},
+            {code: "596041", name: "استيفن البير رفعت لمعي", study: 50, memory: null, coptic: 28, qualifiesForExternalExams: true},
+            {code: "488155", name: "استيفن عماد فوزي غبريال", study: 48, memory: 50, coptic: 26, qualifiesForExternalExams: true},
+            {code: "933750", name: "استيفن ميخائيل مكرم اليشع", study: 50, memory: 48, coptic: 26, qualifiesForExternalExams: true},
+            {code: "263076", name: "اندرو بيتر ناشد", study: 38, memory: null, coptic: null, qualifiesForExternalExams: false},
+            {code: "815021", name: "اندرو مايكل محفوظ ابراهيم", study: 42, memory: 40, coptic: 34, qualifiesForExternalExams: false},
+            {code: "749958", name: "اوليفيا مينا جوزيف ويصا", study: 40, memory: 50, coptic: 42, qualifiesForExternalExams: false},
+            {code: "463708", name: "ايريني عماد مكرم قاصد", study: 42, memory: 50, coptic: 44, qualifiesForExternalExams: false},
+            {code: "183562", name: "ايريني فضل مرشد", study: 48, memory: 50, coptic: 40, qualifiesForExternalExams: true},
+            {code: "686400", name: "ايلاريا نصير اسحاق ويصا", study: 48, memory: 50, coptic: 38, qualifiesForExternalExams: true},
+            {code: "827349", name: "باتريك مجدي عوض جورج", study: 46, memory: 50, coptic: 36, qualifiesForExternalExams: true},
+            {code: "395172", name: "باسيل شنودة فكري جورج", study: 48, memory: 50, coptic: 32, qualifiesForExternalExams: true},
+            {code: "651428", name: "بافلي بيشوي جورج نصيف", study: 42, memory: null, coptic: null, qualifiesForExternalExams: false},
+            {code: "704893", name: "بيتر عادل فهيم يوسف", study: 48, memory: 50, coptic: 38, qualifiesForExternalExams: true},
+            {code: "216754", name: "بيشوي عاطف حبيب جرجس", study: 46, memory: 50, coptic: 34, qualifiesForExternalExams: true},
+            {code: "582917", name: "تيموثاوس اشرف سعد ميخائيل", study: 42, memory: 40, coptic: 28, qualifiesForExternalExams: false},
+            {code: "439685", name: "جاد مجدي رياض شنودة", study: 38, memory: null, coptic: null, qualifiesForExternalExams: false},
+            {code: "793251", name: "جورج عماد حبيب يوسف", study: 44, memory: 45, coptic: 32, qualifiesForExternalExams: false},
+            {code: "157604", name: "حبيب صبحي حبيب يوسف", study: 46, memory: 50, coptic: 36, qualifiesForExternalExams: true},
+            {code: "685392", name: "دانيال اشرف فكري عبد النور", study: 48, memory: 50, coptic: 40, qualifiesForExternalExams: true},
+            {code: "741826", name: "ديفيد مينا عبد الملاك ناجي", study: 44, memory: 48, coptic: 34, qualifiesForExternalExams: false},
+            {code: "398457", name: "رامي اشرف رياض شنودة", study: 40, memory: 45, coptic: 30, qualifiesForExternalExams: false},
+            {code: "629814", name: "روماني نبيل مكرم قاصد", study: 46, memory: 50, coptic: 38, qualifiesForExternalExams: true},
+            {code: "512379", name: "ساندرو عماد عوض جورج", study: 42, memory: 50, coptic: 32, qualifiesForExternalExams: false},
+            {code: "2203", name: "نادر نسيم عبد المسيح", study: 42, memory: 50, coptic: 32, qualifiesForExternalExams: false},
+            {code: "22003", name: "نادر 2 نسيم عبد المسيح", study: 48, memory: 50, coptic: 32, qualifiesForExternalExams: false},
+            {code: "876543", name: "سانت كلير جورج فايز اسكندر", study: 48, memory: 50, coptic: 42, qualifiesForExternalExams: true}
+        ];
+        console.log(`تم تحميل ${studentsData.length} طالب (البيانات البديلة)`);
+    }
+}
+        async function loadStudentsData() {
             try {
                 console.log('بدء تحميل البيانات...');
                 
