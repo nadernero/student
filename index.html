@@ -223,14 +223,17 @@
                                         <p id="totalServantsStat" class="text-3xl font-bold">0</p>
                                     </div>
                                 </div>
-                                <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
                                     <h3 class="font-bold text-pink-600 dark:text-pink-400 mb-2 text-lg flex-shrink-0">أعياد ميلاد قادمة</h3>
-                                    <div id="upcomingBirthdayStat" class="overflow-y-auto flex-grow" style="max-height: 100px;">
+                                    <div id="upcomingBirthdayStat" class="overflow-y-auto flex-grow" style="max-height: 120px;">
                                         <!-- Birthday list will be populated here -->
                                     </div>
                                 </div>
-                                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
-                                    <h3 class="font-bold text-red-600 dark:text-red-400 mb-2 text-lg">غياب الجمعة الماضية</h3>
+                                <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                    <div class="flex justify-between items-baseline mb-2">
+                                        <h3 class="font-bold text-red-600 dark:text-red-400 text-lg">غياب الجمعة الماضية</h3>
+                                        <div id="lastFridayAbsenceCount" class="font-bold text-lg"></div>
+                                    </div>
                                     <div id="lastFridayAbsenceStat" class="text-sm text-gray-500 dark:text-gray-400 flex-grow">
                                         <!-- Absentee list will be populated here -->
                                     </div>
@@ -616,12 +619,12 @@
         </div>
     </div>
     <div id="activityAttendeesModal" class="fixed inset-0 z-50 items-center justify-center hidden-view modal-backdrop">
-        <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-lg z-50 p-8">
-            <div class="flex justify-between items-center pb-3">
-                <h3 id="activityAttendeesModalTitle" class="h3"></h3>
+        <div class="bg-white dark:bg-gray-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-lg z-50 p-8 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 id="activityAttendeesModalTitle" class="h2"></h3>
                 <button class="close-modal-btn cursor-pointer z-50 text-2xl" aria-label="إغلاق النافذة">&times;</button>
             </div>
-            <div id="activityAttendeesModalBody" class="mt-4 max-h-60 overflow-y-auto">
+            <div id="activityAttendeesModalBody" class="overflow-y-auto">
                 <!-- Attendee list will be injected here -->
             </div>
         </div>
@@ -668,7 +671,7 @@
             { name: "خدمة ثالثة ورابعة بنات", icon: '<i class="fas fa-female"></i>', color: 'pink' },
             { name: "خدمة ثالثة ورابعة أولاد", icon: '<i class="fas fa-male"></i>', color: 'indigo' },
             { name: "خدمة خامسة وسادسة بنات", icon: '<i class="fas fa-palette"></i>', color: 'red' },
-            { name: "خدمة خامسة وسادسة أولاد", icon: '<i class="fas fa-running"></i>', color: 'purple' },
+            { name: "خدمة خامسة وسادسة أولاد", icon: '<i class="fas fa-futbol"></i>', color: 'purple' },
             { name: "خدمة الكورال والأنشطة", icon: '<i class="fas fa-music"></i>', color: 'teal' },
             { name: "خدمة وسائل الإيضاح", icon: '<i class="fas fa-desktop"></i>', color: 'orange' },
             { name: "الامين العام", icon: '<i class="fas fa-user-shield"></i>', color: 'blue' }
@@ -1918,18 +1921,21 @@
                 const upcomingBirthdays = getUpcomingBirthdays(servantsCache, 100);
 
                 if (upcomingBirthdays.length > 0) {
-                    birthdayContainer.innerHTML = '<ul class="space-y-1"></ul>';
-                    const ul = birthdayContainer.querySelector('ul');
+                    birthdayContainer.innerHTML = '<div class="space-y-2"></div>';
+                    const containerDiv = birthdayContainer.querySelector('div');
                     upcomingBirthdays.forEach(person => {
                         const dayText = person.daysUntil === 0 ? 'اليوم!' : `بعد ${person.daysUntil} يوم`;
-                        ul.innerHTML += `
-                            <li class="flex justify-between items-center p-2 rounded-lg hover:bg-pink-50 dark:hover:bg-pink-900/20">
-                                <div>
-                                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm">${person.name}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">${person.date}</p>
+                        containerDiv.innerHTML += `
+                            <div class="flex items-center justify-between p-2 rounded-lg transition-colors hover:bg-pink-50 dark:hover:bg-pink-900/30">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-birthday-cake text-pink-400"></i>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm whitespace-nowrap">${person.name}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">${person.date}</p>
+                                    </div>
                                 </div>
-                                <span class="text-sm font-bold text-pink-500">${dayText}</span>
-                            </li>
+                                <span class="text-xs font-bold text-white bg-pink-500 rounded-full px-2 py-1">${dayText}</span>
+                            </div>
                         `;
                     });
                 } else {
@@ -1983,8 +1989,12 @@
                 }
 
                 const lastFridayAbsenceContainer = DOMElements.lastFridayAbsenceStat;
+                const lastFridayAbsenceCountContainer = DOMElements.lastFridayAbsenceCount;
                 const { dateString: lastFridayDateString } = getLastFriday();
                 const lastFridayData = attendanceYearCache[lastFridayDateString];
+
+                lastFridayAbsenceCountContainer.innerHTML = '';
+                lastFridayAbsenceContainer.innerHTML = '';
 
                 if (lastFridayData && lastFridayData.service) {
                     const serviceActivity = lastFridayData.service;
@@ -1993,16 +2003,21 @@
                     } else {
                         const attendees = new Set(serviceActivity.attendees || []);
                         const absentees = servantsCache.filter(servant => !attendees.has(servant.id));
+                        
+                        lastFridayAbsenceCountContainer.innerHTML = `
+                            <span class="font-bold text-xl ${absentees.length > 0 ? 'text-red-500' : 'text-green-500'}">${absentees.length}</span>
+                            <span class="text-gray-500"> / ${servantsCache.length}</span>
+                        `;
 
                         if (absentees.length > 0) {
-                            let listHTML = '<ul class="space-y-2 max-h-[70px] overflow-y-auto">';
+                            let listHTML = '<ul class="space-y-1 max-h-[70px] overflow-y-auto">';
                             absentees.forEach(servant => {
-                                listHTML += `<li class="p-1.5 bg-red-50 dark:bg-red-900/20 rounded-md font-semibold text-red-700 dark:text-red-400 flex items-center"><i class="fas fa-times-circle text-red-400 mr-2"></i>${servant.name}</li>`;
+                                listHTML += `<li class="font-semibold text-red-700 dark:text-red-400 flex items-center"><i class="fas fa-times-circle text-red-400 ml-2"></i>${servant.name}</li>`;
                             });
                             listHTML += '</ul>';
                             lastFridayAbsenceContainer.innerHTML = listHTML;
                         } else {
-                            lastFridayAbsenceContainer.innerHTML = `<p class="text-green-600 dark:text-green-400 font-semibold flex items-center"><i class="fas fa-check-circle mr-2"></i>لا يوجد غياب! كل الخدام حضروا الخدمة.</p>`;
+                            lastFridayAbsenceContainer.innerHTML = `<p class="text-green-600 dark:text-green-400 font-semibold flex items-center mt-2"><i class="fas fa-check-circle ml-2"></i>لا يوجد غياب! كل الخدام حضروا الخدمة.</p>`;
                         }
                     }
                 } else {
@@ -2016,7 +2031,6 @@
                     let statusClass = 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300';
                     let statusIcon = 'fa-times-circle';
                     let statusText = 'لم يسجل';
-                    let isClickable = false;
 
                     if (activityData) {
                         if (activityData.note !== null && activityData.note !== undefined) {
@@ -2026,16 +2040,17 @@
                         } else {
                             statusClass = 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300';
                             statusIcon = 'fa-check-circle';
-                            statusText = 'مسجل';
-                            isClickable = true;
+                            const attendeesCount = activityData.attendees ? activityData.attendees.length : 0;
+                            const totalServants = servantsCache.length;
+                            statusText = `مسجل (${attendeesCount}/${totalServants})`;
                         }
                     }
 
                     lastFridayStatusContainer.innerHTML += `
-                        <div data-activity-key="${act.key}" class="activity-status-card p-3 rounded-lg flex flex-col items-center justify-center text-center ${statusClass} ${isClickable ? 'cursor-pointer hover:ring-2 hover:ring-cyan-400 transition-all' : ''}">
+                        <div data-activity-key="${act.key}" class="activity-status-card p-3 rounded-lg flex flex-col items-center justify-center text-center transition-transform hover:scale-105 cursor-pointer ${statusClass}">
                             <i class="fas ${act.icon} text-2xl mb-2"></i>
                             <p class="font-bold text-sm">${act.name}</p>
-                            <p class="text-xs font-semibold flex items-center gap-1 mt-1"><i class="fas ${statusIcon}"></i> ${statusText}</p>
+                            <p class="text-sm font-semibold flex items-center gap-1 mt-1"><i class="fas ${statusIcon}"></i> ${statusText}</p>
                         </div>
                     `;
                 });
@@ -2058,6 +2073,53 @@
                     <td class="p-3">${val(servant.mobile)}</td>`;
                 DOMElements.adminServantsTableBody.appendChild(row);
             });
+        }
+        
+        function showActivityAttendees(activityKey) {
+            const { dateString: lastFridayDateString } = getLastFriday();
+            const lastFridayData = attendanceYearCache[lastFridayDateString];
+            const activity = activityMap.get(activityKey);
+
+            if (!activity) return;
+
+            DOMElements.activityAttendeesModalTitle.textContent = `حضور: ${activity.name}`;
+            const body = DOMElements.activityAttendeesModalBody;
+            body.innerHTML = ''; // Clear previous content
+
+            if (!lastFridayData || !lastFridayData[activityKey]) {
+                body.innerHTML = '<p class="text-gray-500 text-center">لم يتم تسجيل هذا النشاط بعد.</p>';
+                openModal(DOMElements.activityAttendeesModal);
+                return;
+            }
+
+            const activityData = lastFridayData[activityKey];
+
+            if (activityData.note) {
+                body.innerHTML = `<p class="text-yellow-600 dark:text-yellow-400 text-center font-semibold">تم إلغاء هذا النشاط. <br> السبب: ${activityData.note}</p>`;
+                openModal(DOMElements.activityAttendeesModal);
+                return;
+            }
+
+            const attendeeIds = new Set(activityData.attendees || []);
+            if (attendeeIds.size === 0) {
+                body.innerHTML = '<p class="text-gray-500 text-center">لم يسجل حضور لأي خادم في هذا النشاط.</p>';
+                openModal(DOMElements.activityAttendeesModal);
+                return;
+            }
+
+            const attendees = servantsCache.filter(s => attendeeIds.has(s.id));
+            
+            const list = document.createElement('ul');
+            list.className = 'space-y-2';
+            attendees.forEach(servant => {
+                const li = document.createElement('li');
+                li.className = 'p-2 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center gap-3';
+                li.innerHTML = `<i class="fas fa-user-check text-green-500"></i> <span class="font-semibold">${servant.name}</span>`;
+                list.appendChild(li);
+            });
+            body.appendChild(list);
+
+            openModal(DOMElements.activityAttendeesModal);
         }
 
 
@@ -2135,8 +2197,9 @@
             DOMElements.totalServantsCard.addEventListener('click', () => switchPage('servantsPage'));
             DOMElements.lastFridayStatusContainer.addEventListener('click', (e) => {
                 const card = e.target.closest('.activity-status-card');
-                if (card && card.classList.contains('cursor-pointer')) {
-                    showActivityAttendees(card.dataset.activityKey);
+                if (card) {
+                    const activityKey = card.dataset.activityKey;
+                    showActivityAttendees(activityKey);
                 }
             });
 
@@ -3063,34 +3126,6 @@
                 link.click();
             });
         }
-        
-        function showActivityAttendees(activityKey) {
-            const activity = activityMap.get(activityKey);
-            if (!activity) return;
-
-            const { dateString: lastFridayDateString } = getLastFriday();
-            const lastFridayData = attendanceYearCache[lastFridayDateString];
-
-            if (!lastFridayData || !lastFridayData[activityKey]) return;
-
-            const attendeesIds = new Set(lastFridayData[activityKey].attendees || []);
-            const attendees = servantsCache.filter(s => attendeesIds.has(s.id));
-
-            DOMElements.activityAttendeesModalTitle.textContent = `حضور نشاط: ${activity.name}`;
-            const body = DOMElements.activityAttendeesModalBody;
-            
-            if (attendees.length > 0) {
-                body.innerHTML = '<ul class="space-y-2"></ul>';
-                const ul = body.querySelector('ul');
-                attendees.forEach(servant => {
-                    ul.innerHTML += `<li class="p-2 bg-gray-100 dark:bg-gray-700 rounded-md font-semibold">${servant.name}</li>`;
-                });
-            } else {
-                body.innerHTML = '<p class="text-gray-500 text-center">لا يوجد حضور مسجل لهذا النشاط.</p>';
-            }
-
-            openModal(DOMElements.activityAttendeesModal);
-        }
 
 
         // --- APP INITIALIZATION ---
@@ -3151,6 +3186,7 @@
                 totalServantsStat: document.getElementById('totalServantsStat'),
                 upcomingBirthdayStat: document.getElementById('upcomingBirthdayStat'),
                 lastFridayAbsenceStat: document.getElementById('lastFridayAbsenceStat'),
+                lastFridayAbsenceCount: document.getElementById('lastFridayAbsenceCount'),
                 lastFridayStatusContainer: document.getElementById('lastFridayStatusContainer'),
                 quickAddServant: document.getElementById('quickAddServant'),
                 quickGoToAttendance: document.getElementById('quickGoToAttendance'),
@@ -3166,9 +3202,6 @@
                 unifiedProfileModal: document.getElementById('unifiedProfileModal'),
                 unifiedProfileModalTitle: document.getElementById('unifiedProfileModalTitle'),
                 unifiedProfileModalBody: document.getElementById('unifiedProfileModalBody'),
-                activityAttendeesModal: document.getElementById('activityAttendeesModal'),
-                activityAttendeesModalTitle: document.getElementById('activityAttendeesModalTitle'),
-                activityAttendeesModalBody: document.getElementById('activityAttendeesModalBody'),
                 comparisonReportTab: document.getElementById('comparisonReportTab'),
                 standardReportsContainer: document.getElementById('standardReportsContainer'),
                 comparisonReportContainer: document.getElementById('comparisonReportContainer'),
@@ -3191,6 +3224,9 @@
                 exportAnalysisBtn: document.getElementById('exportAnalysisBtn'),
                 themeCheckbox: document.getElementById('theme-checkbox'),
                 totalServantsCard: document.getElementById('totalServantsCard'),
+                activityAttendeesModal: document.getElementById('activityAttendeesModal'),
+                activityAttendeesModalTitle: document.getElementById('activityAttendeesModalTitle'),
+                activityAttendeesModalBody: document.getElementById('activityAttendeesModalBody'),
             };
 
             initializeFirebase();
