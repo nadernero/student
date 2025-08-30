@@ -141,6 +141,28 @@
         .slider.round:before {
             border-radius: 50%;
         }
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: var(--color-danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        /* Style for the selected Friday button */
+        .friday-btn.active {
+            background-color: var(--color-primary-darker);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+            border: 2px solid white;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -180,7 +202,6 @@
                     <a href="#" data-page="servantsPage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-users ml-3 w-6 text-center"></i> إدارة الخدام</a>
                     <a href="#" data-page="attendancePage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-check-square ml-3 w-6 text-center"></i> تسجيل الحضور</a>
                     <a href="#" data-page="reportsPage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-chart-pie ml-3 w-6 text-center"></i> التقارير والإحصائيات</a>
-                    <a href="#" data-page="activityAnalysisPage" id="activityAnalysisLink" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view"><i class="fas fa-chart-line ml-3 w-6 text-center"></i> تحليل الأنشطة</a>
                 </div>
                 <div class="p-4 border-t dark:border-gray-700 space-y-2">
                      <div class="theme-switch-wrapper py-2">
@@ -215,8 +236,8 @@
                         <div id="serviceDashboardContainer">
                              <h1 class="h1 mb-6">لوحة معلومات الخدمة</h1>
                              <div id="announcementsDisplay" class="mb-6"></div>
-                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                                <div id="totalServantsCard" class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4 cursor-pointer transition-transform hover:scale-105">
+                             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+                                <div id="totalServantsCard" class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4 cursor-pointer transition-transform hover:scale-105">
                                     <i class="fas fa-users text-4xl text-cyan-500"></i>
                                     <div>
                                         <p class="text-gray-500 dark:text-gray-400 text-sm">إجمالي الخدام</p>
@@ -229,7 +250,7 @@
                                         <!-- Birthday list will be populated here -->
                                     </div>
                                 </div>
-                                <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
+                                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
                                     <div class="flex justify-between items-baseline mb-2">
                                         <h3 class="font-bold text-red-600 dark:text-red-400 text-lg">غياب الجمعة الماضية</h3>
                                         <div id="lastFridayAbsenceCount" class="font-bold text-lg"></div>
@@ -478,66 +499,6 @@
                         </div>
                     </div>
 
-                    <!-- [RE-STYLED] Page: Activity Analysis with Filters -->
-                    <div id="activityAnalysisPage" class="page-content hidden-view">
-                        <h1 class="h1 mb-2">تحليل الغياب</h1>
-                        <p class="text-gray-500 dark:text-gray-400 mb-6">استخدم الفلاتر أدناه لعرض تقارير الغياب المخصصة.</p>
-                        
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                            <!-- Filters Section -->
-                            <div class="space-y-6">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="analysisServiceFilter" class="block mb-2 font-bold text-sm text-gray-700 dark:text-gray-300">الخدمة:</label>
-                                        <select id="analysisServiceFilter" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"></select>
-                                    </div>
-                                    <div>
-                                        <label for="analysisYearFilter" class="block mb-2 font-bold text-sm text-gray-700 dark:text-gray-300">السنة:</label>
-                                        <select id="analysisYearFilter" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"></select>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between items-center mb-2">
-                                        <label class="block font-bold text-sm text-gray-700 dark:text-gray-300">الأشهر (اختر شهر أو أكثر):</label>
-                                        <div class="flex items-center">
-                                            <input id="selectAllMonths" type="checkbox" class="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 ml-2 cursor-pointer">
-                                            <label for="selectAllMonths" class="text-sm font-medium cursor-pointer">اختيار الكل</label>
-                                        </div>
-                                    </div>
-                                    <div id="analysisMonthCheckboxes" class="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3">
-                                        <!-- Month checkboxes will be populated here -->
-                                    </div>
-                                </div>
-                                <div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                     <div class="flex items-center gap-3">
-                                        <label class="font-bold text-sm whitespace-nowrap">عرض النتيجة كـ:</label>
-                                        <div class="relative inline-block w-28 h-10 flex items-center justify-center">
-                                            <input type="checkbox" id="analysisModeToggle" class="absolute w-full h-full opacity-0 z-10 cursor-pointer"/>
-                                            <div class="w-full h-full bg-gray-300 dark:bg-gray-600 rounded-full shadow-inner"></div>
-                                            <div id="analysisModeLabel" class="absolute text-white font-bold transition-all duration-300 ease-in-out"></div>
-                                        </div>
-                                    </div>
-                                    <button id="generateAnalysisBtn" class="w-full md:w-auto bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                                        <i class="fas fa-cogs"></i>
-                                        <span>إنشاء التقرير</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Results Section -->
-                            <div id="analysisResultContainer" class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
-                                <!-- Analysis results will be injected here -->
-                            </div>
-                            
-                            <!-- Export Button -->
-                             <div id="exportAnalysisBtnContainer" class="flex justify-end mt-6 hidden-view">
-                                <button id="exportAnalysisBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-all flex items-center justify-center gap-2">
-                                    <i class="fas fa-file-image"></i>
-                                    <span>تصدير كصورة</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </main>
         </div>
@@ -828,7 +789,6 @@
             
             DOMElements.sidebarLinks.querySelector('[data-page="servantsPage"]').classList.toggle('hidden-view', isGeneralSecretaryMode);
             DOMElements.sidebarLinks.querySelector('[data-page="attendancePage"]').classList.toggle('hidden-view', isGeneralSecretaryMode);
-            DOMElements.activityAnalysisLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
             DOMElements.followUpLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
             
             showLoading(true);
@@ -884,7 +844,6 @@
             if (pageId === 'servantsPage') displayUpcomingBirthdays();
             if (pageId === 'attendancePage' && !isGeneralSecretaryMode) loadAttendancePage();
             if (pageId === 'reportsPage') loadReportsPage();
-            if (pageId === 'activityAnalysisPage') initializeActivityAnalysisPage();
         }
 
         // --- DATA FETCHING ---
@@ -1162,14 +1121,32 @@
         }
 
         // --- ATTENDANCE FUNCTIONS ---
-        function loadAttendancePage() {
-            DOMElements.yearSelector.innerHTML = '<option value="">اختر سنة</option>';
-            for (let i = 2030; i >= 2025; i--) {
+        async function loadAttendancePage() {
+            // Populate years, e.g., from 2024 to 5 years from now
+            DOMElements.yearSelector.innerHTML = '';
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const startYear = 2024;
+            const endYear = currentYear + 5;
+            for (let i = endYear; i >= startYear; i--) {
                 DOMElements.yearSelector.innerHTML += `<option value="${i}">${i}</option>`;
             }
-            DOMElements.monthSelector.innerHTML = '<option value="">اختر شهر</option>';
-            DOMElements.monthSelector.disabled = true;
-            DOMElements.fridaysGrid.innerHTML = '';
+            
+            // Set defaults to current year and month
+            const currentMonth = today.getMonth();
+            DOMElements.yearSelector.value = currentYear;
+            
+            showLoading(true);
+            await loadAttendanceForYear(currentYear);
+            showLoading(false);
+            
+            populateMonths(currentYear);
+            DOMElements.monthSelector.value = currentMonth;
+            DOMElements.monthSelector.disabled = false;
+            
+            populateFridaysGrid(currentYear, currentMonth);
+
+            // Clear the rest of the UI
             DOMElements.activityButtons.classList.add('hidden-view');
             DOMElements.attendanceListContainer.classList.add('hidden-view');
         }
@@ -2010,11 +1987,11 @@
                         `;
 
                         if (absentees.length > 0) {
-                            let listHTML = '<ul class="space-y-1 max-h-[70px] overflow-y-auto">';
+                            let listHTML = `<div class="overflow-y-auto" style="max-height: 140px;"><ul class="pr-2">`;
                             absentees.forEach(servant => {
-                                listHTML += `<li class="font-semibold text-red-700 dark:text-red-400 flex items-center"><i class="fas fa-times-circle text-red-400 ml-2"></i>${servant.name}</li>`;
+                                listHTML += `<li class="font-semibold text-red-700 dark:text-red-400 flex items-center p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"><i class="fas fa-times-circle text-red-400 ml-3 flex-shrink-0"></i><span class="truncate">${servant.name}</span></li>`;
                             });
-                            listHTML += '</ul>';
+                            listHTML += `</ul></div>`;
                             lastFridayAbsenceContainer.innerHTML = listHTML;
                         } else {
                             lastFridayAbsenceContainer.innerHTML = `<p class="text-green-600 dark:text-green-400 font-semibold flex items-center mt-2"><i class="fas fa-check-circle ml-2"></i>لا يوجد غياب! كل الخدام حضروا الخدمة.</p>`;
@@ -2402,10 +2379,6 @@
             DOMElements.exportPngBtn.addEventListener('click', exportAsImage);
             DOMElements.exportPdfBtn.addEventListener('click', exportAsPdf);
             
-            // Activity Analysis Page Listeners
-            DOMElements.generateAnalysisBtn.addEventListener('click', generateAbsenceAnalysis);
-            DOMElements.exportAnalysisBtn.addEventListener('click', exportAnalysisAsImage);
-
             // Theme Toggle Listener
             DOMElements.themeCheckbox.addEventListener('change', toggleTheme);
 
@@ -3213,15 +3186,6 @@
                 attendanceFollowUpPanel: document.getElementById('attendanceFollowUpPanel'),
                 activityAnalysisLink: document.getElementById('activityAnalysisLink'),
                 followUpLink: document.getElementById('followUpLink'),
-                analysisServiceFilter: document.getElementById('analysisServiceFilter'),
-                analysisYearFilter: document.getElementById('analysisYearFilter'),
-                analysisMonthCheckboxes: document.getElementById('analysisMonthCheckboxes'),
-                analysisModeToggle: document.getElementById('analysisModeToggle'),
-                analysisModeLabel: document.getElementById('analysisModeLabel'),
-                generateAnalysisBtn: document.getElementById('generateAnalysisBtn'),
-                analysisResultContainer: document.getElementById('analysisResultContainer'),
-                exportAnalysisBtnContainer: document.getElementById('exportAnalysisBtnContainer'),
-                exportAnalysisBtn: document.getElementById('exportAnalysisBtn'),
                 themeCheckbox: document.getElementById('theme-checkbox'),
                 totalServantsCard: document.getElementById('totalServantsCard'),
                 activityAttendeesModal: document.getElementById('activityAttendeesModal'),
@@ -3237,3 +3201,4 @@
     </script>
 </body>
 </html>
+
