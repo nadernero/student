@@ -142,19 +142,13 @@
             border-radius: 50%;
         }
         .notification-badge {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            background-color: var(--color-danger);
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            background-color: var(--color-danger);
+            color: white;
+            border-radius: 50%;
         }
         /* Style for the selected Friday button */
         .friday-btn.active {
@@ -162,6 +156,41 @@
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
             border: 2px solid white;
+        }
+        .unread-note {
+            background-color: var(--color-primary-light) !important;
+            border-right: 4px solid var(--color-primary);
+        }
+        
+        /* Bulletin Board Styles */
+        .bulletin-board-bg {
+             background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png'), linear-gradient(to bottom right, #d2b48c, #c19a6b);
+             background-blend-mode: overlay;
+             box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+             min-height: 80vh;
+        }
+        .announcement-note {
+            background-color: #ffffe0;
+            color: #333;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease-in-out;
+            font-family: 'Cairo', sans-serif; 
+        }
+        .announcement-note:hover {
+            transform: scale(1.05) rotate(0deg) !important;
+            z-index: 10;
+        }
+        .announcement-note::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 20px;
+            background: #d9534f;
+            border-radius: 50% 50% 0 0;
+            box-shadow: 0 -2px 2px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -186,7 +215,7 @@
             </main>
         </div>
     </div>
-
+    
     <!-- Main Dashboard View (Initially Hidden) -->
     <div id="mainDashboard" class="hidden-view">
         <div class="flex h-screen bg-gray-100 dark:bg-gray-800">
@@ -198,6 +227,24 @@
                 </div>
                 <div id="sidebarLinks" class="flex-grow pt-4">
                     <a href="#" data-page="homePage" class="sidebar-link active flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-tachometer-alt ml-3 w-6 text-center"></i> لوحة المعلومات</a>
+                    <a href="#" data-page="serviceAnnouncementsPage" id="serviceAnnouncementsLink" class="sidebar-link relative flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view">
+                        <i class="fas fa-bullhorn ml-3 w-6 text-center"></i>
+                        <span>لوحة الإعلانات</span>
+                        <span id="serviceAnnouncementsBadge" class="notification-badge hidden-view absolute top-2 right-2 w-5 h-5 text-xs"></span>
+                    </a>
+                    <a href="#" data-page="announcementsBoardPage" id="announcementsBoardLink" class="sidebar-link relative flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view">
+                        <i class="fas fa-bullhorn ml-3 w-6 text-center"></i>
+                        <span>لوحة الاعلانات</span>
+                    </a>
+                    <a href="#" data-page="correspondenceCenterPage" id="correspondenceCenterLink" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view">
+                        <i class="fas fa-paper-plane ml-3 w-6 text-center"></i>
+                        <span>مركز المراسلات</span>
+                    </a>
+                    <a href="#" data-page="correspondencePage" id="correspondenceLink" class="sidebar-link relative flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view">
+                        <i class="fas fa-envelope-open-text ml-3 w-6 text-center"></i>
+                        <span>صندوق الرسائل</span>
+                        <span id="correspondenceBadge" class="notification-badge hidden-view absolute top-2 right-2 w-5 h-5 text-xs"></span>
+                    </a>
                     <a href="#" data-page="followUpPage" id="followUpLink" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300 hidden-view"><i class="fas fa-clipboard-check ml-3 w-6 text-center"></i> صفحة المتابعة</a>
                     <a href="#" data-page="servantsPage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-users ml-3 w-6 text-center"></i> إدارة الخدام</a>
                     <a href="#" data-page="attendancePage" class="sidebar-link flex items-center py-3 px-4 text-gray-700 dark:text-gray-300"><i class="fas fa-check-square ml-3 w-6 text-center"></i> تسجيل الحضور</a>
@@ -235,7 +282,6 @@
                         <!-- Service-specific Dashboard -->
                         <div id="serviceDashboardContainer">
                              <h1 class="h1 mb-6">لوحة معلومات الخدمة</h1>
-                             <div id="announcementsDisplay" class="mb-6"></div>
                              <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
                                 <div id="totalServantsCard" class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4 cursor-pointer transition-transform hover:scale-105">
                                     <i class="fas fa-users text-4xl text-cyan-500"></i>
@@ -327,22 +373,98 @@
                                         <h2 class="h2 mb-4">متوسط الحضور العام (آخر 30 يوم)</h2>
                                         <div class="relative h-80"><canvas id="adminAttendanceChart"></canvas></div>
                                     </div>
-                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                        <h2 class="h2 mb-4">لوحة الإعلانات المركزية</h2>
-                                        <div id="adminAnnouncementsList" class="space-y-3 max-h-40 overflow-y-auto mb-4 pr-2"></div>
-                                        <textarea id="newAnnouncementInput" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700" placeholder="اكتب إعلانك الجديد هنا..."></textarea>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">توجيه الإعلان إلى:</label>
-                                        <div id="announcementTarget" class="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 h-32 overflow-y-auto space-y-2">
-                                            <!-- Checkboxes will be populated by JS -->
-                                        </div>
-                                        <button id="addAnnouncementBtn" class="mt-3 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg">إضافة إعلان</button>
-                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- [NEW] Page: Follow-up Page -->
+                     <!-- [NEW] Service Announcements Bulletin Board Page -->
+                    <div id="serviceAnnouncementsPage" class="page-content hidden-view">
+                         <div class="text-center mb-10">
+                            <h1 id="bulletinBoardTitle" class="h1 text-amber-800 dark:text-amber-400">لوحة إعلانات الخدمة</h1>
+                        </div>
+                        <div id="bulletinBoard" class="bulletin-board-bg p-6 rounded-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <!-- Announcement notes will be populated here -->
+                        </div>
+                        <div id="loadMoreAnnouncementsContainer" class="text-center mt-6 hidden-view">
+                            <button id="loadMoreAnnouncementsBtn" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg">
+                                <i class="fas fa-history mr-2"></i> عرض الإعلانات القديمة
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <!-- [NEW] Page: Announcements Board Page -->
+                    <div id="announcementsBoardPage" class="page-content hidden-view">
+                        <h1 class="h1 mb-6 text-cyan-600 dark:text-cyan-400">لوحة الاعلانات</h1>
+                        <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg space-y-8">
+                            
+                            <!-- Step 1: Target -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                                <h2 class="h3 border-b pb-2 mb-4 text-gray-700 dark:text-gray-300 flex items-center gap-3">
+                                    <span class="bg-cyan-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</span>
+                                    <span>توجيه الإعلان</span>
+                                </h2>
+                                <div id="announcementTarget" class="w-full p-3 border rounded-lg bg-white dark:bg-gray-700 h-32 overflow-y-auto space-y-2">
+                                    <!-- Checkboxes will be populated by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Compose -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                                <h2 class="h3 border-b pb-2 mb-4 text-gray-700 dark:text-gray-300 flex items-center gap-3">
+                                     <span class="bg-cyan-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</span>
+                                    <span>كتابة الإعلان</span>
+                                </h2>
+                                <textarea id="newAnnouncementInput" class="w-full p-2 border rounded-lg bg-white dark:bg-gray-700" placeholder="اكتب إعلانك الجديد هنا..." rows="4"></textarea>
+                                <button id="addAnnouncementBtn" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>إرسال الإعلان</span>
+                                </button>
+                            </div>
+
+                             <!-- Step 3: History -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                                <h2 class="h3 border-b pb-2 mb-4 text-gray-700 dark:text-gray-300 flex items-center gap-3">
+                                     <span class="bg-cyan-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</span>
+                                    <span>سجل الإعلانات المرسلة</span>
+                                </h2>
+                                <div id="adminAnnouncementsList" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- [NEW] Page: Correspondence Page -->
+                    <div id="correspondencePage" class="page-content hidden-view">
+                        <h1 class="h1 mb-6">صندوق الرسائل</h1>
+                         <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                            <div id="incomingNotesContainer" class="space-y-3 max-h-[75vh] overflow-y-auto pr-2">
+                                <p class="text-gray-400 text-center text-sm p-4">جاري تحميل الرسائل...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- [NEW] Page: Correspondence Center (for sending messages) -->
+                    <div id="correspondenceCenterPage" class="page-content hidden-view">
+                        <h1 class="h1 mb-6">مركز المراسلات</h1>
+                        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                             <h2 class="h2 mb-2">إرسال رسالة جديدة للأمين العام</h2>
+                             <p class="text-gray-500 mb-4 text-sm">سيتم إرسال هذه الرسالة مباشرة إلى صندوق الوارد الخاص بالأمين العام.</p>
+                             <textarea id="noteToAdminInput" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="اكتب رسالتك هنا..."></textarea>
+                             <button id="sendNoteToAdminBtn" class="mt-3 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>إرسال</span>
+                             </button>
+                             <div class="mt-6 border-t dark:border-gray-700 pt-4">
+                                 <h3 class="font-bold text-lg mb-3">سجل الرسائل المرسلة</h3>
+                                 <div id="sentNotesHistory" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                                     <!-- Sent notes will be populated here -->
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Page: Follow-up Page -->
                     <div id="followUpPage" class="page-content hidden-view">
                         <h1 class="h1 mb-6">صفحة المتابعة</h1>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -657,8 +779,9 @@
 
         // --- GLOBAL STATE ---
         let currentServiceName = '';
-        let db, auth, userId, servantsUnsubscribe = null, announcementsUnsubscribe = null;
+        let db, auth, userId, servantsUnsubscribe = null, announcementsUnsubscribe = null, notesUnsubscribe = null;
         let servantsCache = [];
+        let allAnnouncementsCache = [];
         let attendanceYearCache = {}; 
         let currentActivity = '';
         let selectedFriday = '';
@@ -667,6 +790,13 @@
         let allServantsCache = [];
         let allAttendanceCache = [];
         let isLocalMode = false;
+        let incomingNotesUnsubscribe = null;
+        let displayedAnnouncementsCount = 0;
+        const ANNOUNCEMENTS_PER_PAGE = 3;
+        let unreadNotes = [];
+        let unreadAnnouncementsCache = [];
+        let serviceAnnouncementsUnsubscribe = null;
+        
         // Chart instances
         let reportChart1 = null, reportChart2 = null, homeChart = null;
         let adminChart = null, comparisonChart = null, profileChart = null, activityComparisonChart = null;
@@ -774,9 +904,14 @@
             DOMElements.servicesGrid.innerHTML = '';
             services.forEach(service => {
                 const card = document.createElement('div');
-                card.className = `service-card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 cursor-pointer flex flex-col items-center text-center border-2 border-transparent hover:ring-4 hover:ring-offset-2 hover:ring-${service.color}-400 dark:hover:ring-offset-gray-900`;
+                card.className = `service-card relative bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 cursor-pointer flex flex-col items-center text-center border-2 border-transparent hover:ring-4 hover:ring-offset-2 hover:ring-${service.color}-400 dark:hover:ring-offset-gray-900`;
                 card.dataset.serviceName = service.name;
-                card.innerHTML = `<div class="text-5xl mb-4 text-${service.color}-500">${service.icon}</div><h3 class="h3">${service.name}</h3>`;
+                const badgeId = `service-badge-${service.name.replace(/\s+/g, '-')}`;
+                card.innerHTML = `
+                    <span id="${badgeId}" class="notification-badge hidden-view absolute top-2 right-2 w-6 h-6 text-sm"></span>
+                    <div class="text-5xl mb-4 text-${service.color}-500">${service.icon}</div>
+                    <h3 class="h3">${service.name}</h3>
+                `;
                 DOMElements.servicesGrid.appendChild(card);
             });
         }
@@ -789,7 +924,11 @@
             
             DOMElements.sidebarLinks.querySelector('[data-page="servantsPage"]').classList.toggle('hidden-view', isGeneralSecretaryMode);
             DOMElements.sidebarLinks.querySelector('[data-page="attendancePage"]').classList.toggle('hidden-view', isGeneralSecretaryMode);
+            DOMElements.announcementsBoardLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
+            DOMElements.correspondenceCenterLink.classList.toggle('hidden-view', isGeneralSecretaryMode);
+            DOMElements.correspondenceLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
             DOMElements.followUpLink.classList.toggle('hidden-view', !isGeneralSecretaryMode);
+            DOMElements.serviceAnnouncementsLink.classList.toggle('hidden-view', isGeneralSecretaryMode);
             
             showLoading(true);
             if (isGeneralSecretaryMode) {
@@ -797,10 +936,13 @@
                 populateAnnouncementTargetSelector();
                 await loadAllServicesData();
                 listenForAnnouncements();
+                listenForIncomingNotes();
                 switchPage('homePage');
             } else {
                 await loadServants();
                 listenForAnnouncements();
+                listenForSentNotes();
+                listenForServiceAnnouncements();
                 switchPage('homePage');
             }
             showLoading(false);
@@ -813,6 +955,9 @@
             currentServiceName = '';
             if (servantsUnsubscribe) servantsUnsubscribe();
             if (announcementsUnsubscribe) announcementsUnsubscribe();
+            if (notesUnsubscribe) notesUnsubscribe();
+            if (incomingNotesUnsubscribe) incomingNotesUnsubscribe();
+            if(serviceAnnouncementsUnsubscribe) serviceAnnouncementsUnsubscribe();
             servantsCache = [];
             attendanceYearCache = {};
             isGeneralSecretaryMode = false;
@@ -820,8 +965,12 @@
             allAttendanceCache = [];
             DOMElements.sidebarLinks.querySelector('[data-page="servantsPage"]').classList.remove('hidden-view');
             DOMElements.sidebarLinks.querySelector('[data-page="attendancePage"]').classList.remove('hidden-view');
-            DOMElements.activityAnalysisLink.classList.add('hidden-view');
+            DOMElements.announcementsBoardLink.classList.add('hidden-view');
+            DOMElements.correspondenceLink.classList.add('hidden-view');
             DOMElements.followUpLink.classList.add('hidden-view');
+            DOMElements.serviceAnnouncementsLink.classList.add('hidden-view');
+            // [FIX] Refresh the badges on the main services grid when returning to it
+            updateServiceCardBadges();
         }
         
         async function switchPage(pageId) {
@@ -831,7 +980,7 @@
             const activeLink = DOMElements.sidebarLinks.querySelector(`.sidebar-link[data-page="${pageId}"]`);
             if (activeLink) {
                 activeLink.classList.add('active');
-                DOMElements.mobilePageTitle.textContent = activeLink.innerText;
+                DOMElements.mobilePageTitle.textContent = activeLink.querySelector('span')?.textContent || activeLink.innerText;
             }
 
             if (window.innerWidth < 768) {
@@ -840,10 +989,76 @@
             }
             
             if (pageId === 'homePage') updateHomePageDashboard();
+            if (pageId === 'announcementsBoardPage') renderAdminAnnouncementsList(allAnnouncementsCache);
+            if (pageId === 'correspondencePage') markNotesAsRead();
             if (pageId === 'followUpPage') updateFollowUpPage();
             if (pageId === 'servantsPage') displayUpcomingBirthdays();
             if (pageId === 'attendancePage' && !isGeneralSecretaryMode) loadAttendancePage();
             if (pageId === 'reportsPage') loadReportsPage();
+            if (pageId === 'serviceAnnouncementsPage') markServiceAnnouncementsAsRead();
+        }
+
+        function listenForUnreadNotesForBadge() {
+            if (isLocalMode) return;
+            const notesColRef = collection(db, 'notesToAdmin');
+            const q = query(notesColRef, where('isRead', '==', false));
+
+            onSnapshot(q, (snapshot) => {
+                const unreadCount = snapshot.size;
+                const adminBadgeId = `service-badge-${"الامين العام".replace(/\s+/g, '-')}`;
+                const adminBadge = document.getElementById(adminBadgeId);
+                if (adminBadge) {
+                    if (unreadCount > 0) {
+                        adminBadge.textContent = unreadCount;
+                        adminBadge.classList.remove('hidden-view');
+                    } else {
+                        adminBadge.classList.add('hidden-view');
+                    }
+                }
+            }, (error) => {
+                console.error("Error listening for notes for badge:", error);
+            });
+        }
+
+        async function updateServiceCardBadges() {
+            await authReady;
+            if (isLocalMode) return;
+
+            try {
+                // The logic for the admin badge has been moved to its own real-time listener `listenForUnreadNotesForBadge`
+                // This function now only handles announcement badges for regular services.
+
+                // Update Service Badges for announcements
+                const announcementsCol = collection(db, 'announcements');
+                const announcementsSnapshot = await getDocs(query(announcementsCol, orderBy('timestamp', 'desc')));
+                const allAnnouncements = announcementsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+                
+                const servicesToCheck = services.filter(s => s.name !== 'الامين العام');
+                servicesToCheck.forEach(service => {
+                    const serviceName = service.name;
+                    const lastReadTimestamp = getLocalData(`lastReadAnn-${serviceName}`) || 0;
+
+                    const relevantAnnouncements = allAnnouncements.filter(ann => 
+                        ann.targetServices && (ann.targetServices.includes('all') || ann.targetServices.includes(serviceName))
+                    );
+
+                    const unreadCount = relevantAnnouncements.filter(ann => ann.timestamp?.toMillis() > lastReadTimestamp).length;
+                    
+                    const serviceBadgeId = `service-badge-${serviceName.replace(/\s+/g, '-')}`;
+                    const serviceBadge = document.getElementById(serviceBadgeId);
+                    if (serviceBadge) {
+                        if (unreadCount > 0) {
+                            serviceBadge.textContent = unreadCount;
+                            serviceBadge.classList.remove('hidden-view');
+                        } else {
+                            serviceBadge.classList.add('hidden-view');
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("Failed to update service card badges:", error);
+            }
         }
 
         // --- DATA FETCHING ---
@@ -2098,8 +2313,848 @@
 
             openModal(DOMElements.activityAttendeesModal);
         }
+        
+        // --- [NEW/MODIFIED] FUNCTIONS FOR SECRETARY GENERAL & ANNOUNCEMENTS ---
+        // ==================================================================
 
+        async function sendNoteToAdmin() {
+            const input = DOMElements.noteToAdminInput;
+            const text = input.value.trim();
+            if (!text) return showMessage('لا يمكنك إرسال ملاحظة فارغة.', true);
 
+            showLoading(true);
+            const noteData = {
+                text: text,
+                senderService: currentServiceName,
+                senderId: userId,
+                timestamp: serverTimestamp(),
+                isRead: false
+            };
+
+            try {
+                const notesColRef = collection(db, 'notesToAdmin');
+                await addDoc(notesColRef, noteData);
+                input.value = '';
+                showMessage('تم إرسال الملاحظة بنجاح.');
+            } catch (error) {
+                console.error("Error sending note:", error);
+                showMessage("فشل إرسال الملاحظة.", true);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function listenForSentNotes() {
+            if (notesUnsubscribe) notesUnsubscribe();
+            const notesColRef = collection(db, 'notesToAdmin');
+            const q = query(notesColRef, where('senderService', '==', currentServiceName), orderBy('timestamp', 'desc'));
+
+            notesUnsubscribe = onSnapshot(q, (snapshot) => {
+                const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderSentNotesHistory(notes);
+            }, (error) => {
+                console.error("Error listening for sent notes:", error);
+            });
+        }
+
+        function renderSentNotesHistory(notes) {
+            const historyContainer = DOMElements.sentNotesHistory;
+            if (!historyContainer) return;
+            historyContainer.innerHTML = '';
+
+            if (notes.length === 0) {
+                historyContainer.innerHTML = '<p class="text-gray-400 text-center text-xs p-2">لا توجد ملاحظات مرسلة.</p>';
+                return;
+            }
+
+            notes.forEach(note => {
+                const noteDate = note.timestamp ? note.timestamp.toDate() : new Date();
+                const timeString = noteDate.toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
+                
+                const isRead = note.isRead;
+                const readIcon = isRead 
+                    ? '<i class="fas fa-check-double text-blue-500" title="تمت القراءة"></i>' 
+                    : '<i class="fas fa-check text-gray-400" title="تم الإرسال"></i>';
+
+                const noteCard = `
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg text-sm flex items-start justify-between gap-2">
+                        <div>
+                            <p class="body-text text-gray-800 dark:text-gray-200 text-xs">${note.text}</p>
+                            <div class="text-xs text-gray-400 mt-2 flex items-center gap-2">
+                                <span>${timeString}</span>
+                                ${readIcon}
+                            </div>
+                        </div>
+                        <button data-id="${note.id}" class="delete-sent-note-btn text-gray-400 hover:text-red-500 transition-colors flex-shrink-0" aria-label="حذف الرسالة">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+                historyContainer.innerHTML += noteCard;
+            });
+        }
+        
+        function listenForIncomingNotes() {
+            if (incomingNotesUnsubscribe) incomingNotesUnsubscribe();
+            const notesColRef = collection(db, 'notesToAdmin');
+            const q = query(notesColRef, orderBy('timestamp', 'desc'));
+
+            incomingNotesUnsubscribe = onSnapshot(q, (snapshot) => {
+                const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                unreadNotes = notes.filter(note => !note.isRead);
+                updateCorrespondenceBadge(unreadNotes.length);
+                renderIncomingNotes(notes);
+            }, (error) => {
+                console.error("Error listening for incoming notes:", error);
+            });
+        }
+
+        function updateCorrespondenceBadge(count) {
+            const badge = DOMElements.correspondenceBadge;
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden-view');
+            } else {
+                badge.classList.add('hidden-view');
+            }
+        }
+
+        async function markNotesAsRead() {
+            if (unreadNotes.length === 0) return;
+            
+            const batch = writeBatch(db);
+            unreadNotes.forEach(note => {
+                const noteRef = doc(db, 'notesToAdmin', note.id);
+                batch.update(noteRef, { isRead: true });
+            });
+            
+            try {
+                await batch.commit();
+            } catch (error) {
+                console.error("Error marking notes as read:", error);
+            }
+        }
+        
+        async function deleteNote(noteId) {
+             await authReady;
+            showConfirm('تأكيد الحذف', 'هل أنت متأكد من حذف هذه الرسالة بشكل نهائي؟', async () => {
+                showLoading(true);
+                try {
+                    const noteDocRef = doc(db, 'notesToAdmin', noteId);
+                    await deleteDoc(noteDocRef);
+                    showMessage("تم حذف الرسالة بنجاح.");
+                } catch (error) {
+                    console.error("Error deleting note:", error);
+                    showMessage("فشل حذف الرسالة.", true);
+                } finally {
+                    showLoading(false);
+                }
+            });
+        }
+
+        async function deleteSentNote(noteId) {
+             await authReady;
+            showConfirm('تأكيد الحذف', 'هل أنت متأكد من حذف هذه الرسالة المرسلة؟', async () => {
+                showLoading(true);
+                try {
+                    const noteDocRef = doc(db, 'notesToAdmin', noteId);
+                    const noteDoc = await getDoc(noteDocRef);
+                    if (noteDoc.exists() && noteDoc.data().senderService === currentServiceName) {
+                        await deleteDoc(noteDocRef);
+                        showMessage("تم حذف الرسالة بنجاح.");
+                    } else {
+                         showMessage("لا تملك الصلاحية لحذف هذه الرسالة.", true);
+                    }
+                } catch (error) {
+                    console.error("Error deleting sent note:", error);
+                    showMessage("فشل حذف الرسالة.", true);
+                } finally {
+                    showLoading(false);
+                }
+            });
+        }
+
+        function renderIncomingNotes(notes) {
+            const container = DOMElements.incomingNotesContainer;
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (notes.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-center text-sm p-4">لا يوجد رسائل واردة.</p>';
+                return;
+            }
+
+            notes.forEach(note => {
+                const noteDate = note.timestamp ? note.timestamp.toDate() : new Date();
+                const timeString = noteDate.toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
+                const isUnread = !note.isRead;
+
+                const noteCard = `
+                    <div class="relative p-3 rounded-lg transition-colors ${isUnread ? 'unread-note' : 'bg-gray-100 dark:bg-gray-700/50'}">
+                        <button data-id="${note.id}" class="delete-note-btn absolute top-2 left-2 text-gray-400 hover:text-red-500 transition-colors" aria-label="حذف الرسالة">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <p class="body-text text-gray-800 dark:text-gray-200">${note.text}</p>
+                        <div class="text-xs text-cyan-600 dark:text-cyan-400 mt-2 text-left font-bold">
+                            <span>${note.senderService}</span> - <span>${timeString}</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += noteCard;
+            });
+        }
+
+        function getLastFriday() {
+            const today = new Date();
+            const dayOfWeek = today.getDay(); // Sunday = 0, Friday = 5
+            const daysToSubtract = (dayOfWeek + 2) % 7; 
+            const lastFriday = new Date(today);
+            lastFriday.setDate(today.getDate() - daysToSubtract);
+            lastFriday.setHours(0, 0, 0, 0);
+            
+            const y = lastFriday.getFullYear();
+            const m = String(lastFriday.getMonth() + 1).padStart(2, '0');
+            const d = String(lastFriday.getDate()).padStart(2, '0');
+            
+            return {
+                date: lastFriday,
+                dateString: `${y}-${m}-${d}`
+            };
+        }
+        
+        function populateAnnouncementTargetSelector() {
+            const container = document.getElementById('announcementTarget');
+            if (!container) return;
+            container.innerHTML = ''; // Clear previous content
+
+            container.innerHTML += `
+                <div class="flex items-center p-1">
+                    <input id="announcement-target-all" type="checkbox" value="all" class="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 ml-2 cursor-pointer">
+                    <label for="announcement-target-all" class="font-bold cursor-pointer">الكل</label>
+                </div>
+            `;
+
+            const serviceNames = services
+                .filter(s => s.name !== 'الامين العام')
+                .map(s => s.name);
+            serviceNames.sort((a,b) => a.localeCompare(b,'ar')).forEach(name => {
+                const checkboxId = `ann-target-${name.replace(/\s+/g, '-')}`;
+                container.innerHTML += `
+                    <div class="flex items-center p-1">
+                        <input id="${checkboxId}" type="checkbox" value="${name}" class="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 ml-2 cursor-pointer service-target-checkbox">
+                        <label for="${checkboxId}" class="cursor-pointer">${name}</label>
+                    </div>
+                `;
+            });
+
+            const allCheckbox = container.querySelector('#announcement-target-all');
+            const serviceCheckboxes = container.querySelectorAll('.service-target-checkbox');
+            allCheckbox.addEventListener('change', (e) => {
+                serviceCheckboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                });
+            });
+
+            serviceCheckboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (!cb.checked) {
+                        allCheckbox.checked = false;
+                    } else {
+                        const allChecked = Array.from(serviceCheckboxes).every(c => c.checked);
+                        allCheckbox.checked = allChecked;
+                    }
+                });
+            });
+        }
+
+        function listenForAnnouncements() {
+            if (announcementsUnsubscribe) announcementsUnsubscribe();
+            const announcementsCol = collection(db, 'announcements');
+            const q = query(announcementsCol, orderBy('timestamp', 'desc'));
+            announcementsUnsubscribe = onSnapshot(q, (snapshot) => {
+                allAnnouncementsCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                if (isGeneralSecretaryMode && DOMElements.announcementsBoardPage.offsetParent !== null) {
+                    renderAdminAnnouncementsList(allAnnouncementsCache);
+                }
+            });
+        }
+        
+        function renderAdminAnnouncementsList(announcements) {
+             const adminList = DOMElements.adminAnnouncementsList;
+             if (!adminList) return;
+
+             adminList.innerHTML = '';
+             if (announcements.length === 0) {
+                 adminList.innerHTML = '<p class="text-gray-500">لا توجد إعلانات حالياً.</p>';
+             } else {
+                 announcements.forEach(ann => {
+                     const date = ann.timestamp?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }) || 'غير محدد';
+                     const targets = ann.targetServices || ['غير محدد'];
+                     const targetText = targets.includes('all') ? 'الكل' : targets.join(', ');
+
+                     adminList.innerHTML += `
+                         <div class="bg-white dark:bg-gray-700/50 p-3 rounded-lg flex justify-between items-start gap-4">
+                             <div>
+                                 <p class="text-gray-800 dark:text-gray-200">${ann.text}</p>
+                                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center gap-4">
+                                     <span><i class="fas fa-calendar-alt mr-1"></i> ${date}</span>
+                                     <span><i class="fas fa-bullseye mr-1"></i> <strong>موجه إلى:</strong> ${targetText}</span>
+                                 </div>
+                             </div>
+                             <button data-id="${ann.id}" class="delete-announcement-btn text-red-500 hover:text-red-700 text-sm flex-shrink-0">
+                                 <i class="fas fa-trash"></i>
+                             </button>
+                         </div>`;
+                 });
+                 adminList.querySelectorAll('.delete-announcement-btn').forEach(btn => {
+                     btn.addEventListener('click', async (e) => {
+                         const id = e.currentTarget.dataset.id;
+                         showConfirm('تأكيد الحذف', 'هل أنت متأكد من حذف هذا الإعلان؟', async () => {
+                              await deleteDoc(doc(db, 'announcements', id));
+                              showMessage('تم حذف الإعلان.');
+                         });
+                     });
+                 });
+             }
+        }
+        
+        async function addAnnouncement() {
+            const input = DOMElements.newAnnouncementInput;
+            const text = input.value.trim();
+            const targetContainer = document.getElementById('announcementTarget');
+            const allCheckbox = targetContainer.querySelector('#announcement-target-all');
+            const selectedCheckboxes = Array.from(targetContainer.querySelectorAll('.service-target-checkbox:checked'));
+            const selectedOptions = selectedCheckboxes.map(cb => cb.value);
+
+            if (text && (allCheckbox.checked || selectedOptions.length > 0)) {
+                const targetServices = allCheckbox.checked ? ['all'] : selectedOptions;
+                
+                try {
+                    await addDoc(collection(db, 'announcements'), {
+                        text: text,
+                        targetServices: targetServices,
+                        timestamp: serverTimestamp()
+                    });
+                    input.value = '';
+                    targetContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                    showMessage('تم إضافة الإعلان بنجاح.');
+                } catch (error) {
+                    console.error("Error adding announcement: ", error);
+                    showMessage('فشل إضافة الإعلان.', true);
+                }
+            } else {
+                showMessage('الرجاء كتابة نص الإعلان واختيار خدمة واحدة على الأقل.', true);
+            }
+        }
+        
+        function listenForServiceAnnouncements() {
+            if (serviceAnnouncementsUnsubscribe) serviceAnnouncementsUnsubscribe();
+            
+            const announcementsCol = collection(db, 'announcements');
+            const q = query(announcementsCol, orderBy('timestamp', 'desc'));
+
+            serviceAnnouncementsUnsubscribe = onSnapshot(q, (snapshot) => {
+                const allAnnouncements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                const relevantAnnouncements = allAnnouncements.filter(ann => 
+                    ann.targetServices && (ann.targetServices.includes('all') || ann.targetServices.includes(currentServiceName))
+                );
+
+                const lastReadTimestamp = getLocalData(`lastReadAnn-${currentServiceName}`) || 0;
+                const unreadCount = relevantAnnouncements.filter(ann => ann.timestamp?.toMillis() > lastReadTimestamp).length;
+                
+                updateServiceAnnouncementsBadge(unreadCount);
+                renderServiceAnnouncements(relevantAnnouncements);
+
+            }, (error) => {
+                console.error("Error listening for service announcements:", error);
+            });
+        }
+
+        function updateServiceAnnouncementsBadge(count) {
+            const badge = DOMElements.serviceAnnouncementsBadge;
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden-view');
+            } else {
+                badge.classList.add('hidden-view');
+            }
+        }
+
+        function renderServiceAnnouncements(announcements) {
+            const container = DOMElements.bulletinBoard;
+            if (!container) return;
+            container.innerHTML = '';
+            displayedAnnouncementsCount = 0;
+
+            if (announcements.length === 0) {
+                container.innerHTML = '<p class="text-center text-white/80 col-span-full">لا توجد إعلانات لعرضها حالياً.</p>';
+                DOMElements.loadMoreAnnouncementsContainer.classList.add('hidden-view');
+                return;
+            }
+
+            const announcementsToDisplay = announcements.slice(0, ANNOUNCEMENTS_PER_PAGE);
+            displayedAnnouncementsCount = announcementsToDisplay.length;
+
+            announcementsToDisplay.forEach(ann => {
+                const date = ann.timestamp?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) || 'غير محدد';
+                const randomRotation = Math.random() * 4 - 2; // -2 to 2 degrees
+                const noteHTML = `
+                    <div class="announcement-note relative p-4 rounded-md h-48 flex flex-col" style="transform: rotate(${randomRotation}deg);">
+                        <p class="flex-grow text-gray-800 text-lg">${ann.text}</p>
+                        <p class="text-xs text-gray-500 text-left mt-2 border-t pt-1">${date}</p>
+                    </div>
+                `;
+                container.innerHTML += noteHTML;
+            });
+
+            if (announcements.length > ANNOUNCEMENTS_PER_PAGE) {
+                DOMElements.loadMoreAnnouncementsContainer.classList.remove('hidden-view');
+            } else {
+                DOMElements.loadMoreAnnouncementsContainer.classList.add('hidden-view');
+            }
+        }
+        
+        async function markServiceAnnouncementsAsRead() {
+            setLocalData(`lastReadAnn-${currentServiceName}`, Date.now());
+            updateServiceAnnouncementsBadge(0);
+        }
+
+        function loadMoreAnnouncements() {
+            const container = DOMElements.bulletinBoard;
+             const relevantAnnouncements = allAnnouncementsCache.filter(ann => 
+                ann.targetServices && (ann.targetServices.includes('all') || ann.targetServices.includes(currentServiceName))
+            );
+
+            const nextAnnouncements = relevantAnnouncements.slice(displayedAnnouncementsCount);
+            
+            nextAnnouncements.forEach(ann => {
+                const date = ann.timestamp?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) || 'غير محدد';
+                const randomRotation = Math.random() * 4 - 2;
+                const noteHTML = `
+                     <div class="announcement-note relative p-4 rounded-md h-48 flex flex-col" style="transform: rotate(${randomRotation}deg);">
+                        <p class="flex-grow text-gray-800 text-lg">${ann.text}</p>
+                        <p class="text-xs text-gray-500 text-left mt-2 border-t pt-1">${date}</p>
+                    </div>
+                `;
+                container.innerHTML += noteHTML;
+            });
+
+            displayedAnnouncementsCount += nextAnnouncements.length;
+            DOMElements.loadMoreAnnouncementsContainer.classList.add('hidden-view');
+        }
+
+        function createKpiCard(icon, title, value, subtext, bgColor, textColor) {
+            return `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
+                    <div class="${bgColor} p-4 rounded-full flex-shrink-0">
+                        <i class="fas fa-${icon} ${textColor} text-2xl w-8 h-8 text-center leading-8"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 font-bold">${title}</p>
+                        <p class="text-2xl font-bold truncate" title="${value}">${value}</p>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">${subtext}</div>
+                    </div>
+                </div>`;
+        }
+
+        function updateAdminDashboard() {
+            const kpiContainer = DOMElements.kpiContainer;
+            if (!kpiContainer) return;
+
+            // KPI 1: Total Servants
+            const totalServants = allServantsCache.length;
+            const servicesCount = services.filter(s => s.name !== "الامين العام").length;
+            const kpi1 = createKpiCard(
+                'users-cog', 
+                'إجمالي الخدام', 
+                totalServants, 
+                `في ${servicesCount} خدمة`,
+                'bg-blue-100 dark:bg-blue-900',
+                'text-blue-600 dark:text-blue-300'
+            );
+
+            // KPI 2: Overall Attendance Last 30 Days
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+            
+            const recentAttendance = allAttendanceCache.filter(item => item.date >= startDate);
+            let totalAttendees = 0;
+            let totalPossible = 0;
+
+            recentAttendance.forEach(day => {
+                const serviceServantsCount = allServantsCache.filter(s => s.serviceName === day.serviceName).length;
+                if (serviceServantsCount > 0) {
+                    activities.forEach(activity => {
+                         const activityData = day[activity.key];
+                         if (activityData && (activityData.note === null || activityData.note === undefined)) {
+                            totalAttendees += activityData.attendees.length;
+                            totalPossible += serviceServantsCount;
+                         }
+                    });
+                }
+            });
+
+            const overallPercentage = totalPossible > 0 ? Math.round((totalAttendees / totalPossible) * 100) : 0;
+            const kpi2 = createKpiCard(
+                'chart-line',
+                'متوسط الحضور العام',
+                `${overallPercentage}%`,
+                'آخر 30 يوم',
+                'bg-green-100 dark:bg-green-900',
+                'text-green-600 dark:text-green-300'
+            );
+
+            kpiContainer.innerHTML = kpi1 + kpi2;
+        }
+
+        function updateFollowUpPage() {
+            const servantAttendanceSummary = {};
+            allServantsCache.forEach(s => servantAttendanceSummary[s.id] = { attended: 0, possible: 0, name: s.name, service: s.serviceName });
+            
+            const lastThreeMonths = new Date();
+            lastThreeMonths.setMonth(lastThreeMonths.getMonth() - 3);
+            
+            allAttendanceCache.filter(rec => new Date(rec.date) >= lastThreeMonths).forEach(item => {
+                activities.forEach(act => {
+                    if(item[act.key] && Array.isArray(item[act.key].attendees)) {
+                        const presentIds = new Set(item[act.key].attendees);
+                        const serviceServants = allServantsCache.filter(s => s.serviceName === item.serviceName);
+                        serviceServants.forEach(servant => {
+                            if (servantAttendanceSummary[servant.id]) {
+                                servantAttendanceSummary[servant.id].possible++;
+                                if(presentIds.has(servant.id)) servantAttendanceSummary[servant.id].attended++;
+                            }
+                        });
+                    }
+                });
+            });
+
+            renderAttendanceFollowUpPanel();
+            renderFollowUpPanel(servantAttendanceSummary);
+            renderBirthdaysPanel();
+        }
+
+        function renderFollowUpPanel(servantAttendanceSummary) {
+            const container = DOMElements.followUpPanel;
+            if (!container) return;
+
+            const needsFollowUp = Object.values(servantAttendanceSummary)
+                .map(s => ({ ...s, percentage: s.possible > 0 ? (s.attended / s.possible) * 100 : 0 }))
+                .filter(s => s.possible > 4 && s.percentage < 50)
+                .sort((a, b) => a.percentage - b.percentage);
+
+            if (needsFollowUp.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center p-4">لا يوجد خدام حالياً بحاجة للمتابعة.</p>';
+                return;
+            }
+
+            container.innerHTML = needsFollowUp.map(s => `
+                <div class="p-2.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 flex justify-between items-center transition-colors">
+                    <div>
+                        <p class="font-semibold text-sm">${s.name}</p>
+                        <p class="text-xs text-gray-500">${s.service}</p>
+                    </div>
+                    <div class="text-red-500 font-bold text-sm">${s.percentage.toFixed(0)}%</div>
+                </div>
+            `).join('');
+        }
+
+        function renderBirthdaysPanel() {
+            const container = DOMElements.birthdaysPanel;
+            if (!container) return;
+
+            const upcomingBdays = getUpcomingBirthdays(allServantsCache, 100); // Get all in next 30 days
+
+            if (upcomingBdays.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center p-4">لا توجد أعياد ميلاد خلال الـ 30 يوم القادمة.</p>';
+                return;
+            }
+
+            container.innerHTML = upcomingBdays.map(bday => `
+                 <div class="p-2.5 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/50 flex justify-between items-center transition-colors">
+                    <div>
+                        <p class="font-semibold text-sm">${bday.name}</p>
+                        <p class="text-xs text-gray-500">${bday.serviceName}</p>
+                    </div>
+                    <div class="text-pink-500 font-bold text-sm whitespace-nowrap">${bday.date}</div>
+                </div>
+            `).join('');
+        }
+        
+        function renderAttendanceFollowUpPanel() {
+            const container = DOMElements.attendanceFollowUpPanel;
+            if (!container) return;
+
+            const { date, dateString } = getLastFriday();
+            const formattedDate = date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
+            
+            const legendHTML = `
+                <div class="flex-shrink-0">
+                    <p class="text-sm text-gray-500 mb-2">آخر جمعة: ${formattedDate}</p>
+                    <div class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                        <p class="text-xs font-bold mb-1 text-center">ترتيب الأنشطة (من اليمين لليسار):</p>
+                        <div class="text-xs text-gray-600 dark:text-gray-400 text-center leading-tight">
+                            ${activities.map(act => act.name).join(' - ')}
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-xs text-center mt-2">
+                            <div><span class="w-3 h-3 bg-green-500 rounded-full inline-block mr-1"></span> مسجل</div>
+                            <div><span class="w-3 h-3 bg-yellow-400 rounded-full inline-block mr-1"></span> ملغى</div>
+                            <div><span class="w-3 h-3 bg-red-500 rounded-full inline-block mr-1"></span> لم يسجل</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const servicesToCheck = services.filter(s => s.name !== 'الامين العام');
+            let allActivitiesComplete = true;
+
+            const serviceListHTML = servicesToCheck.map(service => {
+                const serviceName = service.name;
+                const attendanceRecord = allAttendanceCache.find(rec => rec.date === dateString && rec.serviceName === serviceName);
+                
+                let hasMissingActivities = false;
+                const dotsHTML = activities.map(act => {
+                    const activityData = attendanceRecord ? attendanceRecord[act.key] : undefined;
+                    if (activityData) {
+                        if (activityData.note !== null && activityData.note !== undefined) {
+                            return '<span class="w-3 h-3 bg-yellow-400 rounded-full" title="ملغى"></span>';
+                        }
+                        return '<span class="w-3 h-3 bg-green-500 rounded-full" title="مسجل"></span>';
+                    } else {
+                        hasMissingActivities = true;
+                        allActivitiesComplete = false;
+                        return '<span class="w-3 h-3 bg-red-500 rounded-full" title="لم يسجل"></span>';
+                    }
+                }).join('');
+
+                return `
+                    <div class="p-2.5 rounded-lg flex justify-between items-center ${hasMissingActivities ? 'bg-red-100 dark:bg-red-900/50' : 'bg-gray-100 dark:bg-gray-700/50'}">
+                        <p class="font-semibold text-sm">${serviceName}</p>
+                        <div class="flex items-center gap-1.5">${dotsHTML}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            let contentHTML = '';
+            if (allActivitiesComplete) {
+                 contentHTML = `
+                    <div class="p-3 rounded-lg bg-green-100 dark:bg-green-900/50 text-center flex-grow flex items-center justify-center">
+                        <div>
+                           <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
+                           <p class="font-semibold text-sm text-green-700 dark:text-green-300">ممتاز! جميع الأنشطة مسجلة لآخر جمعة.</p>
+                        </div>
+                    </div>`;
+            } else {
+                 contentHTML = `<div class="overflow-y-auto flex-grow space-y-2">${serviceListHTML}</div>`;
+            }
+
+            container.innerHTML = legendHTML + contentHTML;
+        }
+        
+        function showUnifiedProfile(servantId) {
+            const servant = allServantsCache.find(s => s.id === servantId);
+            if (!servant) return;
+
+            const activityBreakdown = {};
+            activities.forEach(act => activityBreakdown[act.key] = { attended: 0, possible: 0 });
+
+            const servantRecords = allAttendanceCache.filter(rec => rec.serviceName === servant.serviceName);
+            
+            servantRecords.forEach(item => {
+                 activities.forEach(act => {
+                    if(item[act.key] && Array.isArray(item[act.key].attendees)) {
+                        activityBreakdown[act.key].possible++;
+                        if(item[act.key].attendees.includes(servantId)) {
+                            activityBreakdown[act.key].attended++;
+                        }
+                    }
+                 });
+            });
+
+            let breakdownHTML = '';
+            for(const key in activityBreakdown) {
+                const data = activityBreakdown[key];
+                const percentage = data.possible > 0 ? Math.round((data.attended / data.possible) * 100) : 0;
+                breakdownHTML += `
+                    <div>
+                        <p class="text-sm font-semibold">${activityMap.get(key).name}</p>
+                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                            <div class="${getPercentageColor(percentage)} h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                        </div>
+                        <p class="text-xs text-right">${data.attended}/${data.possible} (${percentage}%)</p>
+                    </div>
+                `;
+            }
+
+            const val = (data) => data || 'غير متوفر';
+            const body = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1 text-center">
+                        <img src="${servant.imageUrl || 'https://placehold.co/120x120/E2E8F0/4A5568?text=?'}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-cyan-500 shadow-lg">
+                        <h4 class="h3 mt-3">${val(servant.name)}</h4>
+                        <p class="text-gray-500">${val(servant.serviceName)}</p>
+                    </div>
+                    <div class="md:col-span-2 space-y-4">
+                        <div>
+                            <h3 class="h3 border-b pb-2 mb-3">المعلومات الشخصية</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                                <p class="flex items-center"><i class="fas fa-mobile-alt w-5 ml-2 text-cyan-600"></i><strong>الموبايل:</strong><span class="mr-2">${val(servant.mobile)}</span></p>
+                                <p class="flex items-center"><i class="fas fa-birthday-cake w-5 ml-2 text-cyan-600"></i><strong>ت. الميلاد:</strong><span class="mr-2">${val(servant.dob)}</span></p>
+                                <p class="flex items-center col-span-2"><i class="fas fa-id-card w-5 ml-2 text-cyan-600"></i><strong>الرقم القومي:</strong><span class="mr-2">${val(servant.nationalId)}</span></p>
+                                <p class="flex items-center col-span-2"><i class="fas fa-map-marker-alt w-5 ml-2 text-cyan-600"></i><strong>العنوان:</strong><span class="mr-2">${val(servant.address)}</span></p>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="h3 border-b pb-2 mb-3">بيانات الخدمة</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                                <p class="flex items-center"><i class="fas fa-briefcase w-5 ml-2 text-cyan-600"></i><strong>الوظيفة:</strong><span class="mr-2">${val(servant.job)}</span></p>
+                                <p class="flex items-center"><i class="fas fa-graduation-cap w-5 ml-2 text-cyan-600"></i><strong>المؤهل:</strong><span class="mr-2">${val(servant.qualification)}</span></p>
+                                <p class="flex items-center col-span-2"><i class="fas fa-cross w-5 ml-2 text-cyan-600"></i><strong>أب الاعتراف:</strong><span class="mr-2">${val(servant.confessionFather)}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 border-t dark:border-gray-700 pt-4">
+                    <h3 class="h3 mb-3">ملخص الحضور العام</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        ${breakdownHTML}
+                    </div>
+                </div>
+                 <div class="mt-6 border-t dark:border-gray-700 pt-4">
+                    <h3 class="h3 mb-2">معدل الحضور الشهري (آخر 3 أشهر)</h3>
+                    <div class="relative h-48"><canvas id="profileAttendanceChart"></canvas></div>
+                </div>
+            `;
+            DOMElements.unifiedProfileModalBody.innerHTML = body;
+            openModal(DOMElements.unifiedProfileModal);
+            
+            generateProfileAttendanceChart(servantId, servant.serviceName);
+        }
+        
+        function generateProfileAttendanceChart(servantId, serviceName) {
+            const monthlyData = {};
+            const monthLabels = [];
+            
+            for (let i = 2; i >= 0; i--) {
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+                const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                monthLabels.push(d.toLocaleDateString('ar-EG', { month: 'short', year: 'numeric' }));
+                monthlyData[monthKey] = { attended: 0, possible: 0 };
+            }
+
+            const servantRecords = allAttendanceCache.filter(rec => rec.serviceName === serviceName);
+            servantRecords.forEach(item => {
+                const itemMonthKey = item.date.substring(0, 7);
+                if (monthlyData[itemMonthKey]) {
+                    activities.forEach(act => {
+                        if (item[act.key] && Array.isArray(item[act.key].attendees)) {
+                            monthlyData[itemMonthKey].possible++;
+                            if (item[act.key].attendees.includes(servantId)) {
+                                monthlyData[itemMonthKey].attended++;
+                            }
+                        }
+                    });
+                }
+            });
+
+            const percentages = Object.values(monthlyData).map(data => 
+                data.possible > 0 ? Math.round((data.attended / data.possible) * 100) : 0
+            );
+
+            if (profileChart) profileChart.destroy();
+            const ctx = document.getElementById('profileAttendanceChart').getContext('2d');
+            profileChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthLabels,
+                    datasets: [{
+                        label: 'نسبة الحضور',
+                        data: percentages,
+                        borderColor: 'rgb(14, 116, 144)', // cyan-700
+                        backgroundColor: 'rgba(14, 116, 144, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function populateComparisonSelectors() {
+            const selectors = [DOMElements.comparisonServiceSelector1, DOMElements.comparisonServiceSelector2];
+            const serviceNames = services.filter(s => s.name !== 'الامين العام').map(s => s.name);
+            selectors.forEach(selector => {
+                selector.innerHTML = '<option value="">اختر خدمة</option>';
+                serviceNames.forEach(name => {
+                    selector.innerHTML += `<option value="${name}">${name}</option>`;
+                });
+            });
+        }
+
+        function generateComparisonReport() {
+            const service1 = DOMElements.comparisonServiceSelector1.value;
+            const service2 = DOMElements.comparisonServiceSelector2.value;
+
+            if (!service1 || !service2) {
+                return showMessage('الرجاء اختيار خدمتين للمقارنة.', true);
+            }
+            if (service1 === service2) {
+                return showMessage('الرجاء اختيار خدمتين مختلفتين.', true);
+            }
+
+            const calculateAverages = (serviceName) => {
+                const serviceServantsCount = allServantsCache.filter(s => s.serviceName === serviceName).length;
+                if (serviceServantsCount === 0) return activities.map(() => 0);
+                
+                const activityTotals = {};
+                activities.forEach(act => activityTotals[act.key] = { attended: 0, possible: 0 });
+
+                allAttendanceCache.filter(rec => rec.serviceName === serviceName).forEach(item => {
+                    activities.forEach(act => {
+                        if (item[act.key] && item[act.key].attendees) {
+                            activityTotals[act.key].attended += item[act.key].attendees.length;
+                            activityTotals[act.key].possible += serviceServantsCount;
+                        }
+                    });
+                });
+                
+                return activities.map(act => {
+                    const data = activityTotals[act.key];
+                    return data.possible > 0 ? Math.round((data.attended / data.possible) * 100) : 0;
+                });
+            };
+
+            const data1 = calculateAverages(service1);
+            const data2 = calculateAverages(service2);
+
+            if (comparisonChart) comparisonChart.destroy();
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: activities.map(a => a.name),
+                    datasets: [
+                        { label: service1, data: data1, backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 },
+                        { label: service2, data: data2, backgroundColor: 'rgba(255, 99, 132, 0.6)', borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } }
+                }
+            });
+        }
+        
         // --- EVENT LISTENERS INITIALIZATION ---
         function initializeEventListeners() {
             // Main navigation
@@ -2179,6 +3234,22 @@
                     showActivityAttendees(activityKey);
                 }
             });
+            DOMElements.sendNoteToAdminBtn.addEventListener('click', sendNoteToAdmin);
+            DOMElements.incomingNotesContainer.addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.delete-note-btn');
+                if(deleteBtn) {
+                    deleteNote(deleteBtn.dataset.id);
+                }
+            });
+            
+            DOMElements.sentNotesHistory.addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.delete-sent-note-btn');
+                if(deleteBtn) {
+                    deleteSentNote(deleteBtn.dataset.id);
+                }
+            });
+
+            DOMElements.loadMoreAnnouncementsBtn.addEventListener('click', loadMoreAnnouncements);
 
 
             // Servants Page Listeners
@@ -2392,715 +3463,7 @@
                 DOMElements.sidebarOverlay.classList.add('hidden');
             });
         }
-
-        // ==================================================================
-        // --- NEW/MODIFIED FUNCTIONS FOR SECRETARY GENERAL ---
-        // ==================================================================
-
-        function getLastFriday() {
-            const today = new Date();
-            const dayOfWeek = today.getDay(); // Sunday = 0, Friday = 5
-            const daysToSubtract = (dayOfWeek + 2) % 7; 
-            const lastFriday = new Date(today);
-            lastFriday.setDate(today.getDate() - daysToSubtract);
-            lastFriday.setHours(0, 0, 0, 0);
-            
-            const y = lastFriday.getFullYear();
-            const m = String(lastFriday.getMonth() + 1).padStart(2, '0');
-            const d = String(lastFriday.getDate()).padStart(2, '0');
-            
-            return {
-                date: lastFriday,
-                dateString: `${y}-${m}-${d}`
-            };
-        }
-
-        function populateAnnouncementTargetSelector() {
-            const container = document.getElementById('announcementTarget');
-            if (!container) return;
-            container.innerHTML = ''; // Clear previous content
-
-            container.innerHTML += `
-                <div class="flex items-center p-1">
-                    <input id="announcement-target-all" type="checkbox" value="all" class="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 ml-2 cursor-pointer">
-                    <label for="announcement-target-all" class="font-bold cursor-pointer">الكل</label>
-                </div>
-            `;
-
-            const serviceNames = services
-                .filter(s => s.name !== 'الامين العام')
-                .map(s => s.name);
-            serviceNames.sort((a,b) => a.localeCompare(b,'ar')).forEach(name => {
-                const checkboxId = `ann-target-${name.replace(/\s+/g, '-')}`;
-                container.innerHTML += `
-                    <div class="flex items-center p-1">
-                        <input id="${checkboxId}" type="checkbox" value="${name}" class="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 ml-2 cursor-pointer service-target-checkbox">
-                        <label for="${checkboxId}" class="cursor-pointer">${name}</label>
-                    </div>
-                `;
-            });
-
-            const allCheckbox = container.querySelector('#announcement-target-all');
-            const serviceCheckboxes = container.querySelectorAll('.service-target-checkbox');
-            allCheckbox.addEventListener('change', (e) => {
-                serviceCheckboxes.forEach(cb => {
-                    cb.checked = e.target.checked;
-                });
-            });
-
-            serviceCheckboxes.forEach(cb => {
-                cb.addEventListener('change', () => {
-                    if (!cb.checked) {
-                        allCheckbox.checked = false;
-                    } else {
-                        const allChecked = Array.from(serviceCheckboxes).every(c => c.checked);
-                        allCheckbox.checked = allChecked;
-                    }
-                });
-            });
-        }
-
-        function listenForAnnouncements() {
-            if (announcementsUnsubscribe) announcementsUnsubscribe();
-            const announcementsCol = collection(db, 'announcements');
-            const q = query(announcementsCol, orderBy('timestamp', 'desc'));
-            announcementsUnsubscribe = onSnapshot(q, (snapshot) => {
-                const announcements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                displayAnnouncements(announcements);
-            });
-        }
-
-        function displayAnnouncements(announcements) {
-            const adminList = DOMElements.adminAnnouncementsList;
-            const userDisplay = DOMElements.announcementsDisplay;
-            
-            if (adminList && isGeneralSecretaryMode) {
-                adminList.innerHTML = '';
-                if (announcements.length === 0) {
-                    adminList.innerHTML = '<p class="text-gray-500">لا توجد إعلانات حالياً.</p>';
-                } else {
-                    announcements.forEach(ann => {
-                        const date = ann.timestamp?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }) || 'غير محدد';
-                        const targets = ann.targetServices || ['غير محدد'];
-                        const targetText = targets.includes('all') ? 'الكل' : targets.join(', ');
-
-                        adminList.innerHTML += `
-                            <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex justify-between items-start gap-4">
-                                <div>
-                                    <p class="text-gray-800 dark:text-gray-200">${ann.text}</p>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center gap-4">
-                                        <span><i class="fas fa-calendar-alt mr-1"></i> ${date}</span>
-                                        <span><i class="fas fa-bullseye mr-1"></i> <strong>موجه إلى:</strong> ${targetText}</span>
-                                    </div>
-                                </div>
-                                <button data-id="${ann.id}" class="delete-announcement-btn text-red-500 hover:text-red-700 text-sm flex-shrink-0">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>`;
-                    });
-                    adminList.querySelectorAll('.delete-announcement-btn').forEach(btn => {
-                        btn.addEventListener('click', async (e) => {
-                            const id = e.currentTarget.dataset.id;
-                            showConfirm('تأكيد الحذف', 'هل أنت متأكد من حذف هذا الإعلان؟', async () => {
-                                 await deleteDoc(doc(db, 'announcements', id));
-                                 showMessage('تم حذف الإعلان.');
-                            });
-                        });
-                    });
-                }
-            }
-
-            if (userDisplay && !isGeneralSecretaryMode) {
-                userDisplay.innerHTML = '';
-                const relevantAnnouncements = announcements.filter(ann => 
-                    ann.targetServices && (ann.targetServices.includes('all') || ann.targetServices.includes(currentServiceName))
-                );
-
-                if (relevantAnnouncements.length > 0) {
-                    const latestAnn = relevantAnnouncements[0];
-                    userDisplay.innerHTML = `
-                        <div class="bg-cyan-100 dark:bg-cyan-900 border-r-4 border-cyan-500 text-cyan-800 dark:text-cyan-200 p-4 rounded-lg shadow">
-                            <div class="flex items-center">
-                                <i class="fas fa-bullhorn text-2xl ml-4"></i>
-                                <div>
-                                    <h4 class="font-bold">إعلان هام من الأمين العام</h4>
-                                    <p>${latestAnn.text}</p>
-                                </div>
-                            </div>
-                        </div>`;
-                }
-            }
-        }
-
-        async function addAnnouncement() {
-            const input = DOMElements.newAnnouncementInput;
-            const text = input.value.trim();
-            const targetContainer = document.getElementById('announcementTarget');
-            const allCheckbox = targetContainer.querySelector('#announcement-target-all');
-            const selectedCheckboxes = Array.from(targetContainer.querySelectorAll('.service-target-checkbox:checked'));
-            const selectedOptions = selectedCheckboxes.map(cb => cb.value);
-
-            if (text && (allCheckbox.checked || selectedOptions.length > 0)) {
-                const targetServices = allCheckbox.checked ? ['all'] : selectedOptions;
-                
-                try {
-                    await addDoc(collection(db, 'announcements'), {
-                        text: text,
-                        targetServices: targetServices,
-                        timestamp: serverTimestamp()
-                    });
-                    input.value = '';
-                    targetContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-                    showMessage('تم إضافة الإعلان بنجاح.');
-                } catch (error) {
-                    console.error("Error adding announcement: ", error);
-                    showMessage('فشل إضافة الإعلان.', true);
-                }
-            } else {
-                showMessage('الرجاء كتابة نص الإعلان واختيار خدمة واحدة على الأقل.', true);
-            }
-        }
-
-        function renderAdminKPIs() {
-            const kpiContainer = DOMElements.kpiContainer;
-            kpiContainer.innerHTML = '';
-            kpiContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-6';
-
-            kpiContainer.innerHTML += createKpiCard('users', 'إجمالي الخدام', allServantsCache.length, 'خادم في جميع الخدمات', 'bg-blue-100 dark:bg-blue-800', 'text-blue-600');
-
-            const serviceAttendance = {};
-            const today = new Date();
-            const currentMonth = today.getMonth();
-            const currentYear = today.getFullYear();
-            allAttendanceCache.forEach(item => {
-                const itemDate = new Date(item.date);
-                if (itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear) {
-                    if (!serviceAttendance[item.serviceName]) {
-                        serviceAttendance[item.serviceName] = { totalAttendees: 0, totalPossible: 0 };
-                    }
-                    const serviceServantsCount = allServantsCache.filter(s => s.serviceName === item.serviceName).length;
-                    if (serviceServantsCount > 0) {
-                        Object.keys(item).forEach(key => {
-                            if (activityMap.has(key) && item[key].attendees) {
-                                serviceAttendance[item.serviceName].totalAttendees += item[key].attendees.length;
-                                serviceAttendance[item.serviceName].totalPossible += serviceServantsCount;
-                            }
-                        });
-                    }
-                }
-            });
-            let topService = { name: 'لا يوجد', avg: 0 };
-            for (const serviceName in serviceAttendance) {
-                const data = serviceAttendance[serviceName];
-                const avg = data.totalPossible > 0 ? (data.totalAttendees / data.totalPossible) * 100 : 0;
-                if (avg > topService.avg) {
-                    topService = { name: serviceName, avg: avg };
-                }
-            }
-            kpiContainer.innerHTML += createKpiCard('star', 'الخدمة الأعلى حضوراً', topService.name, `${topService.avg.toFixed(1)}% هذا الشهر`, 'bg-green-100 dark:bg-green-800', 'text-green-600');
-        }
-
-        function renderFollowUpPanel(servantAttendanceSummary) {
-            const container = DOMElements.followUpPanel;
-            if (!container) return;
-
-            const needsFollowUp = Object.values(servantAttendanceSummary)
-                .map(s => ({ ...s, percentage: s.possible > 0 ? (s.attended / s.possible) * 100 : 0 }))
-                .filter(s => s.possible > 4 && s.percentage < 50)
-                .sort((a, b) => a.percentage - b.percentage);
-
-            if (needsFollowUp.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center p-4">لا يوجد خدام حالياً بحاجة للمتابعة.</p>';
-                return;
-            }
-
-            container.innerHTML = needsFollowUp.map(s => `
-                <div class="p-2.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 flex justify-between items-center transition-colors">
-                    <div>
-                        <p class="font-semibold text-sm">${s.name}</p>
-                        <p class="text-xs text-gray-500">${s.service}</p>
-                    </div>
-                    <div class="text-red-500 font-bold text-sm">${s.percentage.toFixed(0)}%</div>
-                </div>
-            `).join('');
-        }
-
-        function renderBirthdaysPanel() {
-            const container = DOMElements.birthdaysPanel;
-            if (!container) return;
-
-            const upcomingBdays = getUpcomingBirthdays(allServantsCache, 100); // Get all in next 30 days
-
-            if (upcomingBdays.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center p-4">لا توجد أعياد ميلاد خلال الـ 30 يوم القادمة.</p>';
-                return;
-            }
-
-            container.innerHTML = upcomingBdays.map(bday => `
-                 <div class="p-2.5 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/50 flex justify-between items-center transition-colors">
-                    <div>
-                        <p class="font-semibold text-sm">${bday.name}</p>
-                        <p class="text-xs text-gray-500">${bday.serviceName}</p>
-                    </div>
-                    <div class="text-pink-500 font-bold text-sm whitespace-nowrap">${bday.date}</div>
-                </div>
-            `).join('');
-        }
-
-        function renderAttendanceFollowUpPanel() {
-            const container = DOMElements.attendanceFollowUpPanel;
-            if (!container) return;
-
-            const { date, dateString } = getLastFriday();
-            const formattedDate = date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
-            
-            const legendHTML = `
-                <div class="flex-shrink-0">
-                    <p class="text-sm text-gray-500 mb-2">آخر جمعة: ${formattedDate}</p>
-                    <div class="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-                        <p class="text-xs font-bold mb-1 text-center">ترتيب الأنشطة (من اليمين لليسار):</p>
-                        <div class="text-xs text-gray-600 dark:text-gray-400 text-center leading-tight">
-                            ${activities.map(act => act.name).join(' - ')}
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 text-xs text-center mt-2">
-                            <div><span class="w-3 h-3 bg-green-500 rounded-full inline-block mr-1"></span> مسجل</div>
-                            <div><span class="w-3 h-3 bg-yellow-400 rounded-full inline-block mr-1"></span> ملغى</div>
-                            <div><span class="w-3 h-3 bg-red-500 rounded-full inline-block mr-1"></span> لم يسجل</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            const servicesToCheck = services.filter(s => s.name !== 'الامين العام');
-            let allActivitiesComplete = true;
-
-            const serviceListHTML = servicesToCheck.map(service => {
-                const serviceName = service.name;
-                const attendanceRecord = allAttendanceCache.find(rec => rec.date === dateString && rec.serviceName === serviceName);
-                
-                let hasMissingActivities = false;
-                const dotsHTML = activities.map(act => {
-                    const activityData = attendanceRecord ? attendanceRecord[act.key] : undefined;
-                    if (activityData) {
-                        if (activityData.note !== null && activityData.note !== undefined) {
-                            return '<span class="w-3 h-3 bg-yellow-400 rounded-full" title="ملغى"></span>';
-                        }
-                        return '<span class="w-3 h-3 bg-green-500 rounded-full" title="مسجل"></span>';
-                    } else {
-                        hasMissingActivities = true;
-                        allActivitiesComplete = false;
-                        return '<span class="w-3 h-3 bg-red-500 rounded-full" title="لم يسجل"></span>';
-                    }
-                }).join('');
-
-                return `
-                    <div class="p-2.5 rounded-lg flex justify-between items-center ${hasMissingActivities ? 'bg-red-100 dark:bg-red-900/50' : 'bg-gray-100 dark:bg-gray-700/50'}">
-                        <p class="font-semibold text-sm">${serviceName}</p>
-                        <div class="flex items-center gap-1.5">${dotsHTML}</div>
-                    </div>
-                `;
-            }).join('');
-            
-            let contentHTML = '';
-            if (allActivitiesComplete) {
-                 contentHTML = `
-                    <div class="p-3 rounded-lg bg-green-100 dark:bg-green-900/50 text-center flex-grow flex items-center justify-center">
-                        <div>
-                           <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
-                           <p class="font-semibold text-sm text-green-700 dark:text-green-300">ممتاز! جميع الأنشطة مسجلة لآخر جمعة.</p>
-                        </div>
-                    </div>`;
-            } else {
-                 contentHTML = `<div class="overflow-y-auto flex-grow space-y-2">${serviceListHTML}</div>`;
-            }
-
-            container.innerHTML = legendHTML + contentHTML;
-        }
-
-        function updateAdminDashboard() {
-            renderAdminKPIs();
-        }
-
-        function updateFollowUpPage() {
-            const servantAttendanceSummary = {};
-            allServantsCache.forEach(s => servantAttendanceSummary[s.id] = { attended: 0, possible: 0, name: s.name, service: s.serviceName });
-            
-            const lastThreeMonths = new Date();
-            lastThreeMonths.setMonth(lastThreeMonths.getMonth() - 3);
-            
-            allAttendanceCache.filter(rec => new Date(rec.date) >= lastThreeMonths).forEach(item => {
-                activities.forEach(act => {
-                    if(item[act.key] && Array.isArray(item[act.key].attendees)) {
-                        const presentIds = new Set(item[act.key].attendees);
-                        const serviceServants = allServantsCache.filter(s => s.serviceName === item.serviceName);
-                        serviceServants.forEach(servant => {
-                            if (servantAttendanceSummary[servant.id]) {
-                                servantAttendanceSummary[servant.id].possible++;
-                                if(presentIds.has(servant.id)) servantAttendanceSummary[servant.id].attended++;
-                            }
-                        });
-                    }
-                });
-            });
-
-            renderAttendanceFollowUpPanel();
-            renderFollowUpPanel(servantAttendanceSummary);
-            renderBirthdaysPanel();
-        }
         
-        function createKpiCard(icon, title, value, subtext, bgColor, textColor) {
-            return `
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
-                    <div class="${bgColor} p-4 rounded-full flex-shrink-0">
-                        <i class="fas fa-${icon} ${textColor} text-2xl w-8 h-8 text-center leading-8"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-500 dark:text-gray-400 font-bold">${title}</p>
-                        <p class="text-2xl font-bold truncate" title="${value}">${value}</p>
-                        <div class="text-gray-500 dark:text-gray-400 text-sm">${subtext}</div>
-                    </div>
-                </div>`;
-        }
-        
-        function showUnifiedProfile(servantId) {
-            const servant = allServantsCache.find(s => s.id === servantId);
-            if (!servant) return;
-
-            const activityBreakdown = {};
-            activities.forEach(act => activityBreakdown[act.key] = { attended: 0, possible: 0 });
-
-            const servantRecords = allAttendanceCache.filter(rec => rec.serviceName === servant.serviceName);
-            
-            servantRecords.forEach(item => {
-                 activities.forEach(act => {
-                    if(item[act.key] && Array.isArray(item[act.key].attendees)) {
-                        activityBreakdown[act.key].possible++;
-                        if(item[act.key].attendees.includes(servantId)) {
-                            activityBreakdown[act.key].attended++;
-                        }
-                    }
-                 });
-            });
-
-            let breakdownHTML = '';
-            for(const key in activityBreakdown) {
-                const data = activityBreakdown[key];
-                const percentage = data.possible > 0 ? Math.round((data.attended / data.possible) * 100) : 0;
-                breakdownHTML += `
-                    <div>
-                        <p class="text-sm font-semibold">${activityMap.get(key).name}</p>
-                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
-                            <div class="${getPercentageColor(percentage)} h-2.5 rounded-full" style="width: ${percentage}%"></div>
-                        </div>
-                        <p class="text-xs text-right">${data.attended}/${data.possible} (${percentage}%)</p>
-                    </div>
-                `;
-            }
-
-            const val = (data) => data || 'غير متوفر';
-            const body = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-1 text-center">
-                        <img src="${servant.imageUrl || 'https://placehold.co/120x120/E2E8F0/4A5568?text=?'}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-cyan-500 shadow-lg">
-                        <h4 class="h3 mt-3">${val(servant.name)}</h4>
-                        <p class="text-gray-500">${val(servant.serviceName)}</p>
-                    </div>
-                    <div class="md:col-span-2 space-y-4">
-                        <div>
-                            <h3 class="h3 border-b pb-2 mb-3">المعلومات الشخصية</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                                <p class="flex items-center"><i class="fas fa-mobile-alt w-5 ml-2 text-cyan-600"></i><strong>الموبايل:</strong><span class="mr-2">${val(servant.mobile)}</span></p>
-                                <p class="flex items-center"><i class="fas fa-birthday-cake w-5 ml-2 text-cyan-600"></i><strong>ت. الميلاد:</strong><span class="mr-2">${val(servant.dob)}</span></p>
-                                <p class="flex items-center col-span-2"><i class="fas fa-id-card w-5 ml-2 text-cyan-600"></i><strong>الرقم القومي:</strong><span class="mr-2">${val(servant.nationalId)}</span></p>
-                                <p class="flex items-center col-span-2"><i class="fas fa-map-marker-alt w-5 ml-2 text-cyan-600"></i><strong>العنوان:</strong><span class="mr-2">${val(servant.address)}</span></p>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="h3 border-b pb-2 mb-3">بيانات الخدمة</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                                <p class="flex items-center"><i class="fas fa-briefcase w-5 ml-2 text-cyan-600"></i><strong>الوظيفة:</strong><span class="mr-2">${val(servant.job)}</span></p>
-                                <p class="flex items-center"><i class="fas fa-graduation-cap w-5 ml-2 text-cyan-600"></i><strong>المؤهل:</strong><span class="mr-2">${val(servant.qualification)}</span></p>
-                                <p class="flex items-center col-span-2"><i class="fas fa-cross w-5 ml-2 text-cyan-600"></i><strong>أب الاعتراف:</strong><span class="mr-2">${val(servant.confessionFather)}</span></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-6 border-t dark:border-gray-700 pt-4">
-                    <h3 class="h3 mb-3">ملخص الحضور العام</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                        ${breakdownHTML}
-                    </div>
-                </div>
-                 <div class="mt-6 border-t dark:border-gray-700 pt-4">
-                    <h3 class="h3 mb-2">معدل الحضور الشهري (آخر 3 أشهر)</h3>
-                    <div class="relative h-48"><canvas id="profileAttendanceChart"></canvas></div>
-                </div>
-            `;
-            DOMElements.unifiedProfileModalBody.innerHTML = body;
-            openModal(DOMElements.unifiedProfileModal);
-            
-            generateProfileAttendanceChart(servantId, servant.serviceName);
-        }
-        
-        function generateProfileAttendanceChart(servantId, serviceName) {
-            const monthlyData = {};
-            const monthLabels = [];
-            
-            for (let i = 2; i >= 0; i--) {
-                const d = new Date();
-                d.setMonth(d.getMonth() - i);
-                const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-                monthLabels.push(d.toLocaleDateString('ar-EG', { month: 'short', year: 'numeric' }));
-                monthlyData[monthKey] = { attended: 0, possible: 0 };
-            }
-
-            const servantRecords = allAttendanceCache.filter(rec => rec.serviceName === serviceName);
-            servantRecords.forEach(item => {
-                const itemMonthKey = item.date.substring(0, 7);
-                if (monthlyData[itemMonthKey]) {
-                    activities.forEach(act => {
-                        if (item[act.key] && Array.isArray(item[act.key].attendees)) {
-                            monthlyData[itemMonthKey].possible++;
-                            if (item[act.key].attendees.includes(servantId)) {
-                                monthlyData[itemMonthKey].attended++;
-                            }
-                        }
-                    });
-                }
-            });
-
-            const percentages = Object.values(monthlyData).map(data => 
-                data.possible > 0 ? Math.round((data.attended / data.possible) * 100) : 0
-            );
-
-            if (profileChart) profileChart.destroy();
-            const ctx = document.getElementById('profileAttendanceChart').getContext('2d');
-            profileChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: monthLabels,
-                    datasets: [{
-                        label: 'نسبة الحضور',
-                        data: percentages,
-                        borderColor: 'rgb(14, 116, 144)', // cyan-700
-                        backgroundColor: 'rgba(14, 116, 144, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        function populateComparisonSelectors() {
-            const selectors = [DOMElements.comparisonServiceSelector1, DOMElements.comparisonServiceSelector2];
-            const serviceNames = services.filter(s => s.name !== 'الامين العام').map(s => s.name);
-            selectors.forEach(selector => {
-                selector.innerHTML = '<option value="">اختر خدمة</option>';
-                serviceNames.forEach(name => {
-                    selector.innerHTML += `<option value="${name}">${name}</option>`;
-                });
-            });
-        }
-
-        function generateComparisonReport() {
-            const service1 = DOMElements.comparisonServiceSelector1.value;
-            const service2 = DOMElements.comparisonServiceSelector2.value;
-
-            if (!service1 || !service2) {
-                return showMessage('الرجاء اختيار خدمتين للمقارنة.', true);
-            }
-            if (service1 === service2) {
-                return showMessage('الرجاء اختيار خدمتين مختلفتين.', true);
-            }
-
-            const calculateAverages = (serviceName) => {
-                const serviceServantsCount = allServantsCache.filter(s => s.serviceName === serviceName).length;
-                if (serviceServantsCount === 0) return activities.map(() => 0);
-                
-                const activityTotals = {};
-                activities.forEach(act => activityTotals[act.key] = { attended: 0, possible: 0 });
-
-                allAttendanceCache.filter(rec => rec.serviceName === serviceName).forEach(item => {
-                    activities.forEach(act => {
-                        if (item[act.key] && item[act.key].attendees) {
-                            activityTotals[act.key].attended += item[act.key].attendees.length;
-                            activityTotals[act.key].possible += serviceServantsCount;
-                        }
-                    });
-                });
-                
-                return activities.map(act => {
-                    const data = activityTotals[act.key];
-                    return data.possible > 0 ? Math.round((data.attended / data.possible) * 100) : 0;
-                });
-            };
-
-            const data1 = calculateAverages(service1);
-            const data2 = calculateAverages(service2);
-
-            if (comparisonChart) comparisonChart.destroy();
-            const ctx = document.getElementById('comparisonChart').getContext('2d');
-            comparisonChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: activities.map(a => a.name),
-                    datasets: [
-                        { label: service1, data: data1, backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 },
-                        { label: service2, data: data2, backgroundColor: 'rgba(255, 99, 132, 0.6)', borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } }
-                }
-            });
-        }
-        
-        // --- [FIXED] ACTIVITY ANALYSIS PAGE FUNCTIONS ---
-
-        function initializeActivityAnalysisPage() {
-            if (!isGeneralSecretaryMode) return;
-            DOMElements.analysisResultContainer.innerHTML = '<p class="text-gray-500 text-center p-4">الرجاء استخدام الفلاتر أعلاه لإنشاء تقرير.</p>';
-            DOMElements.exportAnalysisBtnContainer.classList.add('hidden-view');
-        }
-
-        async function generateAbsenceAnalysis() {
-            showLoading(true);
-            
-            const selectedService = DOMElements.analysisServiceFilter.value;
-            const selectedYear = DOMElements.analysisYearFilter.value;
-            const selectedMonths = Array.from(DOMElements.analysisMonthCheckboxes.querySelectorAll('input:checked')).map(cb => parseInt(cb.value));
-            const isPercentageMode = DOMElements.analysisModeToggle.checked;
-
-            if (selectedMonths.length === 0) {
-                showMessage('الرجاء اختيار شهر واحد على الأقل.', true);
-                showLoading(false);
-                return;
-            }
-
-            let sourceServants = allServantsCache;
-            if (selectedService !== 'all') {
-                sourceServants = allServantsCache.filter(s => s.serviceName === selectedService);
-            }
-
-            const absenceData = {};
-            sourceServants.forEach(s => {
-                absenceData[s.id] = { name: s.name, serviceName: s.serviceName, absences: 0, totalMeetings: 0 };
-            });
-
-            const filteredAttendance = allAttendanceCache.filter(rec => {
-                const recDate = new Date(rec.date);
-                const recYear = recDate.getFullYear();
-                const recMonth = recDate.getMonth() + 1;
-                
-                const serviceMatch = (selectedService === 'all' || rec.serviceName === selectedService);
-                const yearMatch = recYear == selectedYear;
-                const monthMatch = selectedMonths.includes(recMonth);
-
-                return serviceMatch && yearMatch && monthMatch;
-            });
-
-            filteredAttendance.forEach(day => {
-                const serviceServantsOnDate = sourceServants.filter(s => s.serviceName === day.serviceName);
-                
-                const activityData = day.service; // Analyze absence from the main 'service' activity
-                if (activityData && (activityData.note === null || activityData.note === undefined)) {
-                    const attendees = new Set(activityData.attendees || []);
-                    serviceServantsOnDate.forEach(servant => {
-                        if (absenceData[servant.id]) {
-                            absenceData[servant.id].totalMeetings++;
-                            if (!attendees.has(servant.id)) {
-                                absenceData[servant.id].absences++;
-                            }
-                        }
-                    });
-                }
-            });
-
-            const results = Object.values(absenceData)
-                .map(data => ({
-                    ...data,
-                    value: isPercentageMode 
-                        ? (data.totalMeetings > 0 ? ((data.absences / data.totalMeetings) * 100) : 0)
-                        : data.absences
-                }))
-                .filter(data => data.value > 0)
-                .sort((a, b) => b.value - a.value);
-
-            renderAbsenceAnalysis(results, isPercentageMode);
-            showLoading(false);
-        }
-
-        function renderAbsenceAnalysis(results, isPercentageMode) {
-            const container = DOMElements.analysisResultContainer;
-            container.innerHTML = '';
-
-            if (results.length === 0) {
-                container.innerHTML = '<div class="text-center p-8 text-gray-500 dark:text-gray-400"><i class="fas fa-info-circle text-4xl mb-3"></i><p class="font-semibold">لا يوجد غياب مسجل حسب الفلاتر المختارة.</p></div>';
-                DOMElements.exportAnalysisBtnContainer.classList.add('hidden-view');
-                return;
-            }
-            
-            const tableContainer = document.createElement('div');
-            tableContainer.className = "overflow-x-auto";
-
-            const table = document.createElement('table');
-            table.className = 'w-full text-right';
-            let tableHTML = `
-                <thead class="bg-gray-100 dark:bg-gray-700">
-                    <tr>
-                        <th class="p-4 font-bold text-sm">الاسم</th>
-                        <th class="p-4 font-bold text-sm">الخدمة</th>
-                        <th class="p-4 font-bold text-sm text-center">${isPercentageMode ? 'نسبة الغياب' : 'عدد مرات الغياب'}</th>
-                        <th class="p-4 font-bold text-sm text-center">التفاصيل</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            `;
-
-            results.forEach(servant => {
-                const valueDisplay = isPercentageMode ? `${servant.value.toFixed(1)}%` : servant.value;
-                tableHTML += `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <td class="p-4 font-semibold">${servant.name}</td>
-                        <td class="p-4 text-gray-600 dark:text-gray-300">${servant.serviceName}</td>
-                        <td class="p-4 text-center font-bold text-lg ${getPercentageTextColor(100-servant.value)}">${valueDisplay}</td>
-                        <td class="p-4 text-center text-sm text-gray-500">(${servant.absences} غياب من ${servant.totalMeetings} اجتماع)</td>
-                    </tr>
-                `;
-            });
-
-            tableHTML += '</tbody>';
-            table.innerHTML = tableHTML;
-            tableContainer.appendChild(table);
-            container.appendChild(tableContainer);
-            
-            DOMElements.exportAnalysisBtnContainer.classList.remove('hidden-view');
-        }
-
-        async function exportAnalysisAsImage() {
-            const container = document.getElementById('activityAnalysisPage').querySelector('.bg-white');
-            if(!container) return;
-            showMessage('جاري تجهيز الصورة للتصدير...');
-            html2canvas(container, { 
-                backgroundColor: document.body.classList.contains('dark') ? '#1f2937' : '#ffffff',
-                scale: 2,
-                useCORS: true 
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `absence-analysis-${new Date().toISOString().slice(0,10)}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
-        }
-
-
         // --- APP INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             DOMElements = {
@@ -3184,17 +3547,38 @@
                 followUpPanel: document.getElementById('followUpPanel'),
                 birthdaysPanel: document.getElementById('birthdaysPanel'),
                 attendanceFollowUpPanel: document.getElementById('attendanceFollowUpPanel'),
-                activityAnalysisLink: document.getElementById('activityAnalysisLink'),
                 followUpLink: document.getElementById('followUpLink'),
                 themeCheckbox: document.getElementById('theme-checkbox'),
                 totalServantsCard: document.getElementById('totalServantsCard'),
                 activityAttendeesModal: document.getElementById('activityAttendeesModal'),
                 activityAttendeesModalTitle: document.getElementById('activityAttendeesModalTitle'),
                 activityAttendeesModalBody: document.getElementById('activityAttendeesModalBody'),
+                noteToAdminInput: document.getElementById('noteToAdminInput'),
+                sendNoteToAdminBtn: document.getElementById('sendNoteToAdminBtn'),
+                sentNotesHistory: document.getElementById('sentNotesHistory'),
+                incomingNotesContainer: document.getElementById('incomingNotesContainer'),
+                correspondencePage: document.getElementById('correspondencePage'),
+                correspondenceCenterPage: document.getElementById('correspondenceCenterPage'),
+                announcementTarget: document.getElementById('announcementTarget'),
+                correspondenceLink: document.getElementById('correspondenceLink'),
+                correspondenceCenterLink: document.getElementById('correspondenceCenterLink'),
+                correspondenceBadge: document.getElementById('correspondenceBadge'),
+                announcementsBoardPage: document.getElementById('announcementsBoardPage'),
+                announcementsBoardLink: document.getElementById('announcementsBoardLink'),
+                serviceAnnouncementsPage: document.getElementById('serviceAnnouncementsPage'),
+                serviceAnnouncementsLink: document.getElementById('serviceAnnouncementsLink'),
+                bulletinBoard: document.getElementById('bulletinBoard'),
+                bulletinBoardTitle: document.getElementById('bulletinBoardTitle'),
+                loadMoreAnnouncementsContainer: document.getElementById('loadMoreAnnouncementsContainer'),
+                loadMoreAnnouncementsBtn: document.getElementById('loadMoreAnnouncementsBtn'),
+                 serviceAnnouncementsBadge: document.getElementById('serviceAnnouncementsBadge'),
+
             };
 
             initializeFirebase();
             populateServices();
+            updateServiceCardBadges();
+            listenForUnreadNotesForBadge(); // Start listening for admin notes immediately
             initializeEventListeners();
         });
 
